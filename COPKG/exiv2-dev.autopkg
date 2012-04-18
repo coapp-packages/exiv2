@@ -1,0 +1,62 @@
+@import "version.inc" ;
+@import "outercurve.inc" ;
+
+#define { 
+    flavor: "${COMP??vc10}"; 
+    arch : "${PLAT??x86}";
+}
+
+package {
+    name: "exiv2-dev[${flavor}]";
+    version: "${package-version}";
+    arch : "${arch}";
+    display-name: "exiv2 Developer library";
+}
+
+metadata {
+    summary: "The exiv2 developer library";
+    description: @"Exiv2 is a C++ library and a command line utility to manage image metadata. It provides fast and easy read and write access to the Exif, IPTC and XMP metadata of images in various formats."; 
+    icon: @"exiv2.png";
+    author-version : "0.22";
+    bug-tracker: "https://github.com/coapp-packages/exiv2/issues";
+    stability : "0";
+    licenses : {
+        GPL
+    };
+}
+
+requires {
+    package: "exiv2-dev-common-${package-version}-any-${Package.PublicKeyToken}";
+    package: "exiv2[${flavor}]-${package-version}-${Package.Architecture}-${Package.PublicKeyToken}";
+    package: "zlib-dev-common-1.2.5-any-1e373a58e25250cb";
+    package: "zlib[${flavor}]-1.2.5-${Package.Architecture}-1e373a58e25250cb";
+    package: "expat-dev-common-2.0.1-any-1e373a58e25250cb";
+    package: "expat[${flavor}]-2.0.1-${Package.Architecture}-1e373a58e25250cb";
+}
+
+files[libs] {
+    root: @"..\output\${flavor}\${arch}\ReleaseDll\bin\";
+    
+    include: {
+        "*.lib",
+    };
+    
+    trim-path: all;
+};
+
+files[libs-static] {
+    root: @"..\output\${flavor}\${arch}\Release\bin\";
+    
+    include: {
+        "exiv2s.lib",
+    };
+    
+    trim-path: all;
+};
+
+developer-library[exiv2] {
+    libraries : {
+        libs,
+        libs-static,
+    };
+}

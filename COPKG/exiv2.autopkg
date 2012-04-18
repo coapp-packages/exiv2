@@ -1,0 +1,123 @@
+@import "version.inc";
+@import "outercurve.inc";
+
+#define { 
+    flavor: "${COMP??vc10}"; 
+    arch : "${PLAT??x86}";
+}
+
+package {
+    name: "exiv2[${flavor}]";
+    version: "${package-version}";
+    arch : "${arch}";
+    display-name: "exiv2";
+    location: "http://coapp.org/repository/${OutputFilename}";
+    feed: "http://coapp.org/repository/packages.atom.xml";
+    publisher: "CoApp Project";
+}
+
+metadata {
+    summary: "exiv2[${flavor}]";
+    description:  @"Exiv2 is a C++ library and a command line utility to manage image metadata. It provides fast and easy read and write access to the Exif, IPTC and XMP metadata of images in various formats."; 
+    icon: @"exiv2.png";
+    author-version : "0.22";
+    bug-tracker: "https://github.com/coapp-packages/exiv2/issues";
+    stability : "0";
+    licenses : {
+        GPL
+    };
+}
+
+license[GPL] {
+    license-url: "http://www.gnu.org/licenses/gpl.html";
+    license-type: "GPL";
+}
+
+compatability-policy {
+    minimum: "0.22";
+    maximum: "${OneLessThanCurrent}"; // this is the default
+    versions : {
+        "0.20",
+    }; // if not specified, find the versions by looking at the feeds and finding all the major/minor versions in range.
+}
+
+requires {
+    package: "zlib[${flavor}]-1.2.5-${Package.Architecture}";
+    package: "expat[${flavor}]-2.0.1-${Package.Architecture}";
+}
+
+files[exes] {
+    root: @"..\output\${flavor}\${arch}\Release\bin";
+  
+    include: {
+        "*.exe",
+    };
+    
+    trim-path: all;
+};
+
+
+files[dlls] {
+    root: @"..\output\${flavor}\${arch}\ReleaseDll\bin";
+  
+    include: {
+        "*.dll",
+    };
+    
+    trim-path: all;
+};
+
+files[files-to-sign] {
+    include: { 
+        dlls,
+        exes
+    };    
+}
+
+application {
+    include : {
+        exes,
+    };
+}
+
+manifest[forexes] {
+    assembly : {
+        "exiv2[${flavor}]"
+    };
+    
+    include : { 
+        exes
+    };
+}
+
+manifest[forassembly] {
+    assembly : {
+        "expat[${flavor}]",
+        "zlib[${flavor}]",
+    };
+    
+    include : { 
+        dlls
+    };
+}
+
+assembly[exiv2[${flavor}]] {
+    include : {
+        dlls
+    };
+}
+
+signing {
+    attributes : {
+        company="Outercurve Foundation",
+        description="exiv2",
+        product-name="exiv2",
+        product-version="${package-version}",
+        file-version="${package-version}",
+    };
+    
+    replace-signature: true; 
+    include: { 
+        files-to-sign
+    };    
+}

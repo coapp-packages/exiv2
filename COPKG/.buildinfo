@@ -1,0 +1,180 @@
+/* target information */
+@import "version.inc";
+
+
+#product-info  {
+	product-name: "exiv2";
+	version: "0.22";
+	original-source-location: "";
+	original-source-website: "";
+	license: "GPL";
+	packager: "Hamish C";
+}
+
+test {
+    set: {
+        COMPILERS="${COMPILERS??vc10}";
+        PLAT="${PLAT??x86,x64}";
+    };
+
+    default : false;
+    uses: release;
+    build-command: @"
+	    for %%A in (${COMPILERS}) do (
+            for %%B in (${PLAT}) do (
+                call :testroutine ""%%A"" ""%%B""
+            )
+        )
+        goto :eof
+
+:testroutine
+        rem do tests here
+
+        goto passed
+:failed
+        echo ""Test(s) failed for (%~1,%~2)""
+:passed
+        popd
+        goto :eof
+    ";
+};
+
+package {
+    
+    default : false;
+    uses : sign;
+    
+    targets: { 
+        @"copkg\exiv2[vc10]-${package-version}-x86.msi",
+        @"copkg\exiv2-dev[vc10]-${package-version}-x86.msi",
+        @"copkg\exiv2-dev-common-${package-version}-any.msi",
+        @"copkg\exiv2[vc10]-${package-version}-x64.msi",
+        @"copkg\exiv2-dev[vc10]-${package-version}-x64.msi"
+    };
+    
+    build-command : @"
+        pushd COPKG
+        autopackage exiv2-dev-common.autopkg || goto failed
+        
+        for %%A in (${COMP}) do (
+            for %%B in (${PLAT}) do (
+                autopackage --COMP=%%A --PLAT=%%B exiv2.autopkg exiv2-dev.autopkg || goto failed
+            )
+        )
+        popd
+        ptk update-version
+    ";
+
+	clean-command: @"del COPKG\*.msi COPKG\*.wixpdb";
+};
+
+
+update-version {
+    default : false;
+    
+    build-command : @"
+        REM auto-increment version.inc file...
+        
+        pushd COPKG
+        setlocal EnableDelayedExpansion
+        for /F ""tokens=4,5,6,7  delims=.; "" %%v in (version.inc) do (
+            set /a build=%%y + 1
+            set VERSTRING=#define { package-version: %%v.%%w.%%x.!build!; }
+        )
+        echo !VERSTRING! > version.inc
+        popd
+    ";
+}
+
+release {
+    set: {
+        COMPILERS="${COMPILERS??vc10}";
+        PLAT="${PLAT??x86, x64}";
+        CONFIG="Release";
+    };
+
+    build-command: @"
+        for %%A in (${COMPILERS}) do (
+            for %%B in (${PLAT}) do (
+			    ptk -nologo base --CONFIG=${CONFIG} --COMP=%%A --PLAT=%%B
+		    )
+        )
+    ";
+};
+
+debug {
+    set: {
+        COMPILERS="${COMPILERS??vc10}";
+        PLAT="${PLAT??x86, x64}";
+        CONFIG="Debug";
+        DBGSFX="d";
+    };
+
+    build-command: @"
+        for %%A in (${COMPILERS}) do (
+            for %%B in (${PLAT}) do (
+			    ptk -nologo base --CONFIG=${CONFIG} --COMP=%%A --PLAT=%%B
+		    )
+        )
+    ";
+};
+
+sign {
+    default : false;
+    uses: release;
+    build-command: @"simplesigner.exe --nologo --sign output\**.dll output\**.exe";
+};
+
+x86 {
+    set: PLAT=x86;
+    uses: base;
+};
+
+x64 {
+    set: PLAT=x64;
+    uses: base;
+};
+
+base {
+    set: {
+        CONFIG="${CONFIG??Release}";
+        COMP="${COMP??vc10}";
+        PLAT="${PLAT??x86}";
+        DBGSFX="${DGBSFX??}";
+    };
+
+    compiler:"${COMP}";
+    platform:"${PLAT}";
+    
+    requires: "zlib-dev[${COMP}]-1.2.5-${PLAT}";
+    requires: "expat-dev[${COMP}]-2.0.1-${PLAT}";
+
+    targets: { 
+		"output\${COMP}\${PLAT}\${CONFIG}DLL\bin\exiv2${DBGSFX}.dll",
+        "output\${COMP}\${PLAT}\${CONFIG}DLL\bin\exiv2${DBGSFX}.lib",
+        "output\${COMP}\${PLAT}\${CONFIG}DLL\bin\exiv2.exe",
+        "output\${COMP}\${PLAT}\${CONFIG}DLL\bin\xmpsdk.lib",
+        "output\${COMP}\${PLAT}\${CONFIG}\bin\exiv2${DBGSFX}s.lib",
+	};
+	
+    build-command:@"
+        if ""${PLAT}"" == ""x86"" (
+            msbuild /p:Platform=win32 /p:Configuration=ReleaseDLL msvc64\exiv2.sln
+            msbuild /p:Platform=win32 /p:Configuration=Release msvc64\exiv2.sln
+        ) else (
+            msbuild /p:Platform=x64 /p:Configuration=ReleaseDLL msvc64\exiv2.sln
+            msbuild /p:Platform=x64 /p:Configuration=Release msvc64\exiv2.sln
+        )
+	";
+    
+    clean-command:@"
+        if ""${PLAT}"" == ""x86"" (
+            msbuild /p:Platform=win32 /p:Configuration=Release /target:Clean output\exiv2.sln
+        ) else (
+            msbuild /p:Platform=x64 /p:Configuration=Release /target:Clean output\exiv2.sln
+        )
+       if exist output rmdir /s /q output > nul 2> nul
+       if exist msvc64\include\exiv2 rmdir /s /q msvc64\include\exiv2 > nul 2> nul
+       del /S /Q /A - *.sdf *.suo *.user *.exe *.pdb > nul 2>NUL
+    ";
+};
