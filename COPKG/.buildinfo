@@ -4,9 +4,9 @@
 
 #product-info  {
 	product-name: "exiv2";
-	version: "0.22";
-	original-source-location: "";
-	original-source-website: "";
+	version: "${author-version}";
+	original-source-location: "http://exiv2.org/exiv2-0.23.tar.gz";
+	original-source-website: "http://exiv2.org/";
 	license: "GPL";
 	packager: "Hamish C";
 }
@@ -140,7 +140,7 @@ base {
         CONFIG="${CONFIG??Release}";
         COMP="${COMP??vc10}";
         PLAT="${PLAT??x86}";
-        DBGSFX="${DGBSFX??}";
+        DBGSFX="${DBGSFX?? }";//this doesnt work??
     };
 
     compiler:"${COMP}";
@@ -150,11 +150,11 @@ base {
     requires: "expat-dev[${COMP}]-2.0.1-${PLAT}";
 
     targets: { 
-		"output\${COMP}\${PLAT}\${CONFIG}DLL\bin\exiv2${DBGSFX}.dll",
-        "output\${COMP}\${PLAT}\${CONFIG}DLL\bin\exiv2${DBGSFX}.lib",
+        "output\${COMP}\${PLAT}\${CONFIG}DLL\bin\exiv2.dll",
+        "output\${COMP}\${PLAT}\${CONFIG}DLL\bin\exiv2.lib",
         "output\${COMP}\${PLAT}\${CONFIG}DLL\bin\exiv2.exe",
         "output\${COMP}\${PLAT}\${CONFIG}DLL\bin\xmpsdk.lib",
-        "output\${COMP}\${PLAT}\${CONFIG}\bin\exiv2${DBGSFX}s.lib",
+        "output\${COMP}\${PLAT}\${CONFIG}\bin\exiv2s.lib",
 	};
 	
     build-command:@"
