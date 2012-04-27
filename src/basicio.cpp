@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      basicio.cpp
-  Version:   $Rev: 2453 $
+  Version:   $Rev: 2689 $
   Author(s): Brad Schick (brad) <brad@robotbattle.com>
   History:   04-Dec-04, brad: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: basicio.cpp 2453 2011-02-13 14:08:44Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: basicio.cpp 2689 2012-03-24 13:00:00Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -61,12 +61,11 @@ EXIV2_RCSID("@(#) $Id: basicio.cpp 2453 2011-02-13 14:08:44Z ahuggel $")
 # include <unistd.h>                    // for getpid, stat
 #endif
 
-// MSVC doesn't provide mode_t
-#ifdef _MSC_VER
-typedef unsigned short mode_t;
-#endif
-
 #if defined WIN32 && !defined __CYGWIN__
+// Windows doesn't provide mode_t, nlink_t
+typedef unsigned short mode_t;
+typedef short nlink_t;
+
 # include <windows.h>
 # include <io.h>
 #endif
@@ -116,9 +115,10 @@ namespace Exiv2 {
         // TYPES
         //! Simple struct stat wrapper for internal use
         struct StructStat {
-            StructStat() : st_mode(0), st_size(0) {}
-            mode_t st_mode;             //!< Permissions
-            off_t  st_size;             //!< Size
+            StructStat() : st_mode(0), st_size(0), st_nlink(0) {}
+            mode_t  st_mode;            //!< Permissions
+            off_t   st_size;            //!< Size
+            nlink_t st_nlink;           //!< Number of hard links (broken on Windows, see winNumberOfLinks())
         };
 
         // METHODS
@@ -131,6 +131,10 @@ namespace Exiv2 {
         int switchMode(OpMode opMode);
         //! stat wrapper for internal use
         int stat(StructStat& buf) const;
+#if defined WIN32 && !defined __CYGWIN__
+        // Windows function to determine the number of hardlinks (on NTFS)
+        DWORD winNumberOfLinks() const;
+#endif
 
     private:
         // NOT IMPLEMENTED
@@ -231,6 +235,7 @@ namespace Exiv2 {
             if (0 == ret) {
                 buf.st_size = st.st_size;
                 buf.st_mode = st.st_mode;
+                buf.st_nlink = st.st_nlink;
             }
         }
         else
@@ -241,11 +246,49 @@ namespace Exiv2 {
             if (0 == ret) {
                 buf.st_size = st.st_size;
                 buf.st_mode = st.st_mode;
+                buf.st_nlink = st.st_nlink;
             }
         }
         return ret;
     } // FileIo::Impl::stat
 
+#if defined WIN32 && !defined __CYGWIN__
+    DWORD FileIo::Impl::winNumberOfLinks() const
+    {
+        DWORD nlink = 1;
+
+        HANDLE hFd = (HANDLE)_get_osfhandle(fileno(fp_));
+        if (hFd != INVALID_HANDLE_VALUE) {
+            typedef BOOL (WINAPI * GetFileInformationByHandle_t)(HANDLE, LPBY_HANDLE_FILE_INFORMATION);
+            HMODULE hKernel = LoadLibraryA("kernel32.dll");
+            if (hKernel) {
+                GetFileInformationByHandle_t pfcn_GetFileInformationByHandle = (GetFileInformationByHandle_t)GetProcAddress(hKernel, "GetFileInformationByHandle");
+                if (pfcn_GetFileInformationByHandle) {
+                    BY_HANDLE_FILE_INFORMATION fi = {0};
+                    if (pfcn_GetFileInformationByHandle(hFd, &fi)) {
+                        nlink = fi.nNumberOfLinks;
+                    }
+#ifdef DEBUG
+                    else EXV_DEBUG << "GetFileInformationByHandle failed\n";
+#endif
+                }
+#ifdef DEBUG
+                else EXV_DEBUG << "GetProcAddress(hKernel, \"GetFileInformationByHandle\") failed\n";
+#endif
+                FreeLibrary(hKernel);
+            }
+#ifdef DEBUG
+            else EXV_DEBUG << "LoadLibraryA(\"kernel32.dll\") failed\n";
+#endif
+        }
+#ifdef DEBUG
+        else EXV_DEBUG << "_get_osfhandle failed: INVALID_HANDLE_VALUE\n";
+#endif
+
+        return nlink;
+    } // FileIo::Impl::winNumberOfLinks
+
+#endif // defined WIN32 && !defined __CYGWIN__
     FileIo::FileIo(const std::string& path)
         : p_(new Impl(path))
     {
@@ -444,9 +487,16 @@ namespace Exiv2 {
 
         Impl::StructStat buf;
         int ret = p_->stat(buf);
+#if defined WIN32 && !defined __CYGWIN__
+        DWORD nlink = p_->winNumberOfLinks();
+#else 
+        nlink_t nlink = buf.st_nlink;
+#endif
 
-        // If file is > 1MB then use a file, otherwise use memory buffer
-        if (ret != 0 || buf.st_size > 1048576) {
+        // If file is > 1MB and doesn't have hard links then use a file, otherwise
+        // use a memory buffer. I.e., files with hard links always use a memory
+        // buffer, which is a workaround to ensure that the links don't get broken.
+        if (ret != 0 || (buf.st_size > 1048576 && nlink == 1)) {
             pid_t pid = ::getpid();
             std::auto_ptr<FileIo> fileIo;
 #ifdef EXV_UNICODE_PATH
@@ -520,7 +570,7 @@ namespace Exiv2 {
             // Optimization if src is another instance of FileIo
             fileIo->close();
             // Check if the file can be written to, if it already exists
-            if (open("w+b") != 0) {
+            if (open("a+b") != 0) {
                 // Remove the (temporary) file
 #ifdef EXV_UNICODE_PATH
                 if (fileIo->p_->wpMode_ == Impl::wpUnicode) {
@@ -533,12 +583,12 @@ namespace Exiv2 {
                 }
 #ifdef EXV_UNICODE_PATH
                 if (p_->wpMode_ == Impl::wpUnicode) {
-                    throw WError(10, wpath(), "w+b", strError().c_str());
+                    throw WError(10, wpath(), "a+b", strError().c_str());
                 }
                 else
 #endif
                 {
-                    throw Error(10, path(), "w+b", strError());
+                    throw Error(10, path(), "a+b", strError());
                 }
             }
             close();

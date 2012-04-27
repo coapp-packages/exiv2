@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      easyaccess.cpp
-  Version:   $Rev: 2600 $
+  Version:   $Rev: 2711 $
   Author(s): Carsten Pfeiffer <pfeiffer@kde.org>
              Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   28-Feb-09, gis: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: easyaccess.cpp 2600 2011-09-03 15:02:19Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: easyaccess.cpp 2711 2012-04-22 05:28:42Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -104,6 +104,7 @@ namespace Exiv2 {
             "Exif.Sony2Cs2.ISOSetting",
             "Exif.Sony1MltCsA100.ISOSetting",
             "Exif.Pentax.ISO",
+            "Exif.PentaxDng.ISO",
             "Exif.Olympus.ISOSpeed",
             "Exif.Samsung2.ISO"
         };
@@ -174,6 +175,7 @@ namespace Exiv2 {
             "Exif.Panasonic.ShootingMode",
             "Exif.Panasonic.SceneMode",
             "Exif.Pentax.PictureMode",
+            "Exif.PentaxDng.PictureMode",
             "Exif.Photo.SceneCaptureType"
         };
         return findMetadatum(ed, keys, EXV_COUNTOF(keys));
@@ -259,6 +261,7 @@ namespace Exiv2 {
             "Exif.NikonLd2.LensIDNumber",
             "Exif.NikonLd3.LensIDNumber",
             "Exif.Pentax.LensType",
+            "Exif.PentaxDng.LensType",
             "Exif.Minolta.LensID",
             "Exif.SonyMinolta.LensID",
             "Exif.Sony1.LensID",
@@ -283,6 +286,7 @@ namespace Exiv2 {
             "Exif.Nikon3.Saturation",
             "Exif.Panasonic.Saturation",
             "Exif.Pentax.Saturation",
+            "Exif.PentaxDng.Saturation",
             "Exif.Sigma.Saturation"
         };
         return findMetadatum(ed, keys, EXV_COUNTOF(keys));
@@ -301,6 +305,7 @@ namespace Exiv2 {
             "Exif.Olympus.SharpnessFactor",
             "Exif.Panasonic.Sharpness",
             "Exif.Pentax.Sharpness",
+            "Exif.PentaxDng.Sharpness",
             "Exif.Sigma.Sharpness"
         };
         return findMetadatum(ed, keys, EXV_COUNTOF(keys));
@@ -319,6 +324,7 @@ namespace Exiv2 {
             "Exif.Olympus.Contrast",
             "Exif.Panasonic.Contrast",
             "Exif.Pentax.Contrast",
+            "Exif.PentaxDng.Contrast",
             "Exif.Sigma.Contrast"
         };
         return findMetadatum(ed, keys, EXV_COUNTOF(keys));
@@ -420,7 +426,8 @@ namespace Exiv2 {
             "Exif.NikonLd2.FocalLength",
             "Exif.NikonLd3.FocalLength",
             "Exif.MinoltaCsNew.FocalLength",
-            "Exif.Pentax.FocalLength"
+            "Exif.Pentax.FocalLength",
+            "Exif.PentaxDng.FocalLength"
         };
         return findMetadatum(ed, keys, EXV_COUNTOF(keys));
     }
@@ -441,6 +448,8 @@ namespace Exiv2 {
             "Exif.OlympusFi.AFPoint",
             "Exif.Pentax.AFPoint",
             "Exif.Pentax.AFPointInFocus",
+            "Exif.PentaxDng.AFPoint",
+            "Exif.PentaxDng.AFPointInFocus",
             "Exif.Sony1Cs.LocalAFAreaPoint",
             "Exif.Sony2Cs.LocalAFAreaPoint",
             "Exif.Sony1Cs2.LocalAFAreaPoint",

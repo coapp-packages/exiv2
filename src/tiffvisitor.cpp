@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      tiffvisitor.cpp
-  Version:   $Rev: 2453 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   11-Apr-06, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: tiffvisitor.cpp 2453 2011-02-13 14:08:44Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: tiffvisitor.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -1523,10 +1523,9 @@ namespace Exiv2 {
                           << ", exceeds buffer size by "
                           // cast to make MSVC happy
                           << static_cast<uint32_t>(pData + size - pLast_)
-                          << " Bytes; adjusting the size\n";
+                          << " Bytes; truncating the entry\n";
 #endif
-                size = static_cast<uint32_t>(pLast_ - pData);
-                // Todo: adjust count, make size a multiple of typeSize
+                size = 0;
             }
         }
         Value::AutoPtr v = Value::create(typeId);

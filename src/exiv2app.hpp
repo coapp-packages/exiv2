@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    exiv2app.hpp
   @brief   Defines class Params, used for the command line handling of exiv2
-  @version $Rev: 2453 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    08-Dec-03, ahu: created
@@ -57,7 +57,7 @@ struct ModifyCmd {
     std::string key_;                           //!< Exiv2 key string
     MetadataId metadataId_;                     //!< Metadata identifier
     Exiv2::TypeId typeId_;                      //!< Exiv2 type identifier
-    //! Flag to indicate if the type was explicitely specified (true)
+    //! Flag to indicate if the type was explicitly specified (true)
     bool explicitType_;
     std::string value_;                         //!< Data
 };
@@ -220,7 +220,7 @@ private:
       @brief Default constructor. Note that optstring_ is initialized here.
              The c'tor is private to force instantiation through instance().
      */
-    Params() : optstring_(":hVvqfbuktTFa:Y:O:D:r:p:P:d:e:i:c:m:M:l:S:g:n:"),
+    Params() : optstring_(":hVvqfbuktTFa:Y:O:D:r:p:P:d:e:i:c:m:M:l:S:g:n:Q:"),
                help_(false),
                version_(false),
                verbose_(false),
@@ -252,6 +252,7 @@ private:
 
     //! @name Helpers
     //@{
+    int setLogLevel(const std::string& optarg);
     int evalRename(int opt, const std::string& optarg);
     int evalAdjust(const std::string& optarg);
     int evalYodAdjust(const Yod& yod, const std::string& optarg);

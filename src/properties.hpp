@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -23,7 +23,7 @@
   @brief   XMP property and type information.<BR>References:<BR>
   <a href="http://www.adobe.com/devnet/xmp/pdfs/xmp_specification.pdf">XMP Specification</a> from Adobe
   <I>(Property descriptions copied from the XMP specification with the permission of Adobe)</I>
-  @version $Rev: 2453 $
+  @version $Rev: 2701 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @author  Gilles Caulier (cgilles)
@@ -131,6 +131,11 @@ namespace Exiv2 {
         static TypeId propertyType(const XmpKey& key);
         /*!
           @brief Return information for the property for key.
+
+          If the key is a path to a nested property (one which contains a slash,
+          like \c Xmp.MP.RegionInfo/MPRI:Regions), determines the innermost element
+          (\c Xmp.MPRI.Regions) and returns its property information.
+
           @param key The property key
           @return A pointer to the property information, 0 if the
                  key is of an unknown property.
@@ -217,7 +222,7 @@ namespace Exiv2 {
         static const XmpNsInfo* lookupNsRegistry(const XmpNsInfo::Prefix& prefix);
 
         // DATA
-        static NsRegistry nsRegistry_;          //! Namespace registry
+        static NsRegistry nsRegistry_;          //!< Namespace registry
 
     }; // class XmpProperties
 

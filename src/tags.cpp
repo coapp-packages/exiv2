@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,7 +20,7 @@
  */
 /*
   File:      tags.cpp
-  Version:   $Rev: 2606 $
+  Version:   $Rev: 2696 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
              Gilles Caulier (gc) <caulier dot gilles at gmail dot com>
   History:   15-Jan-04, ahu: created
@@ -28,7 +28,7 @@
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: tags.cpp 2606 2011-09-07 13:58:17Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: tags.cpp 2696 2012-04-11 05:50:34Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -120,6 +120,7 @@ namespace Exiv2 {
         { nikonIiId,       "Makernote", "NikonIi",      Nikon3MakerNote::tagListIi     },
         { nikonAfId,       "Makernote", "NikonAf",      Nikon3MakerNote::tagListAf     },
         { nikonAf2Id,      "Makernote", "NikonAf2",     Nikon3MakerNote::tagListAf2    },
+        { nikonAFTId,      "Makernote", "NikonAFT",     Nikon3MakerNote::tagListAFT    },
         { nikonFiId,       "Makernote", "NikonFi",      Nikon3MakerNote::tagListFi     },
         { nikonMeId,       "Makernote", "NikonMe",      Nikon3MakerNote::tagListMe     },
         { nikonFl1Id,      "Makernote", "NikonFl1",     Nikon3MakerNote::tagListFl1    },
@@ -159,9 +160,11 @@ namespace Exiv2 {
         { olympusFe9Id,    "Makernote", "OlympusFe9",   OlympusMakerNote::tagListFe    },
         { olympusRiId,     "Makernote", "OlympusRi",    OlympusMakerNote::tagListRi    },
         { panasonicId,     "Makernote", "Panasonic",    PanasonicMakerNote::tagList    },
+        { pentaxDngId,     "Makernote", "PentaxDng",    PentaxMakerNote::tagList       },
         { pentaxId,        "Makernote", "Pentax",       PentaxMakerNote::tagList       },
         { samsung2Id,      "Makernote", "Samsung2",     Samsung2MakerNote::tagList     },
         { samsungPvId,     "Makernote", "SamsungPreview", ifdTagList                   },
+        { samsungPwId,     "Makernote", "SamsungPictureWizard", Samsung2MakerNote::tagListPw },
         { sigmaId,         "Makernote", "Sigma",        SigmaMakerNote::tagList        },
         { sony1Id,         "Makernote", "Sony1",        SonyMakerNote::tagList         },
         { sony2Id,         "Makernote", "Sony2",        SonyMakerNote::tagList         },
@@ -361,14 +364,14 @@ namespace Exiv2 {
     extern const TagDetails exifFlash[] = {
         { 0x00, N_("No flash")                                                      },
         { 0x01, N_("Fired")                                                         },
-        { 0x05, N_("Fired, strobe return light not detected")                       },
-        { 0x07, N_("Fired, strobe return light detected")                           },
+        { 0x05, N_("Fired, return light not detected")                              },
+        { 0x07, N_("Fired, return light detected")                                  },
         { 0x08, N_("Yes, did not fire")                                             },
         { 0x09, N_("Yes, compulsory")                                               },
         { 0x0d, N_("Yes, compulsory, return light not detected")                    },
         { 0x0f, N_("Yes, compulsory, return light detected")                        },
         { 0x10, N_("No, compulsory")                                                },
-        { 0x14, N_("No, did not fire, return not detected")                         },
+        { 0x14, N_("No, did not fire, return light not detected")                   },
         { 0x18, N_("No, auto")                                                      },
         { 0x19, N_("Yes, auto")                                                     },
         { 0x1d, N_("Yes, auto, return light not detected")                          },

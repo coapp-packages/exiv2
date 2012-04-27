@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      actions.cpp
-  Version:   $Rev: 2594 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   08-Dec-03, ahu: created
              30-Apr-06, Roger Larsson: Print filename if processing multiple files
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: actions.cpp 2594 2011-09-02 10:02:54Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: actions.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files

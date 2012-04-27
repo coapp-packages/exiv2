@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      preview.cpp
-  Version:   $Rev: 2590 $
+  Version:   $Rev: 2698 $
   Author(s): Vladimir Nadvornik (vn) <nadvornik@suse.cz>
   History:   18-Sep-08, vn: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: preview.cpp 2590 2011-09-01 07:58:45Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: preview.cpp 2698 2012-04-11 16:02:44Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -46,6 +46,7 @@ EXIV2_RCSID("@(#) $Id: preview.cpp 2590 2011-09-01 07:58:45Z ahuggel $")
 #include "cr2image.hpp"
 #include "jpgimage.hpp"
 #include "tiffimage.hpp"
+#include "tiffimage_int.hpp"
 
 // *****************************************************************************
 namespace {
@@ -320,8 +321,9 @@ namespace {
         { 0,                       createLoaderExifDataJpeg, 5 },
         { 0,                       createLoaderExifDataJpeg, 6 },
         { 0,                       createLoaderExifDataJpeg, 7 },
-        { "image/x-panasonic-rw2", createLoaderExifDataJpeg, 8 },
-        { 0,                       createLoaderExifDataJpeg, 9 },
+        { 0,                       createLoaderExifDataJpeg, 8 },
+        { "image/x-panasonic-rw2", createLoaderExifDataJpeg, 9 },
+        { 0,                       createLoaderExifDataJpeg,10 },
         { 0,                       createLoaderTiff,         0 },
         { 0,                       createLoaderTiff,         1 },
         { 0,                       createLoaderTiff,         2 },
@@ -329,6 +331,7 @@ namespace {
         { 0,                       createLoaderTiff,         4 },
         { 0,                       createLoaderTiff,         5 },
         { 0,                       createLoaderTiff,         6 },
+        { "image/x-canon-cr2",     createLoaderTiff,         7 },
         { 0,                       createLoaderExifJpeg,     0 },
         { 0,                       createLoaderExifJpeg,     1 },
         { 0,                       createLoaderExifJpeg,     2 },
@@ -354,16 +357,17 @@ namespace {
     };
 
     const LoaderExifDataJpeg::Param LoaderExifDataJpeg::param_[] = {
-        { "Exif.Thumbnail.JPEGInterchangeFormat",      "Exif.Thumbnail.JPEGInterchangeFormatLength"      }, // 0
-        { "Exif.NikonPreview.JPEGInterchangeFormat",   "Exif.NikonPreview.JPEGInterchangeFormatLength"   }, // 1
-        { "Exif.Pentax.PreviewOffset",                 "Exif.Pentax.PreviewLength"                       }, // 2
-        { "Exif.Minolta.ThumbnailOffset",              "Exif.Minolta.ThumbnailLength"                    }, // 3
-        { "Exif.SonyMinolta.ThumbnailOffset",          "Exif.SonyMinolta.ThumbnailLength"                }, // 4
-        { "Exif.Olympus.ThumbnailImage",               0                                                 }, // 5
-        { "Exif.Olympus2.ThumbnailImage",              0                                                 }, // 6
-        { "Exif.Minolta.Thumbnail",                    0                                                 }, // 7
-        { "Exif.PanasonicRaw.PreviewImage",            0                                                 }, // 8
-        { "Exif.SamsungPreview.JPEGInterchangeFormat", "Exif.SamsungPreview.JPEGInterchangeFormatLength" } // 9
+        { "Exif.Thumbnail.JPEGInterchangeFormat",      "Exif.Thumbnail.JPEGInterchangeFormatLength"      }, //  0
+        { "Exif.NikonPreview.JPEGInterchangeFormat",   "Exif.NikonPreview.JPEGInterchangeFormatLength"   }, //  1
+        { "Exif.Pentax.PreviewOffset",                 "Exif.Pentax.PreviewLength"                       }, //  2
+        { "Exif.PentaxDng.PreviewOffset",              "Exif.PentaxDng.PreviewLength"                    }, //  3
+        { "Exif.Minolta.ThumbnailOffset",              "Exif.Minolta.ThumbnailLength"                    }, //  4
+        { "Exif.SonyMinolta.ThumbnailOffset",          "Exif.SonyMinolta.ThumbnailLength"                }, //  5
+        { "Exif.Olympus.ThumbnailImage",               0                                                 }, //  6
+        { "Exif.Olympus2.ThumbnailImage",              0                                                 }, //  7
+        { "Exif.Minolta.Thumbnail",                    0                                                 }, //  8
+        { "Exif.PanasonicRaw.PreviewImage",            0                                                 }, //  9
+        { "Exif.SamsungPreview.JPEGInterchangeFormat", "Exif.SamsungPreview.JPEGInterchangeFormatLength" }  // 10
     };
 
     const LoaderTiff::Param LoaderTiff::param_[] = {
@@ -373,7 +377,8 @@ namespace {
         { "SubImage3", "Exif.SubImage3.NewSubfileType", "1" },  // 3
         { "SubImage4", "Exif.SubImage4.NewSubfileType", "1" },  // 4
         { "SubThumb1", "Exif.SubThumb1.NewSubfileType", "1" },  // 5
-        { "Thumbnail", 0,                               0   }   // 6
+        { "Thumbnail", 0,                               0   },  // 6
+        { "Image2",    0,                               0   }   // 7
     };
 
     Loader::AutoPtr Loader::create(PreviewId id, const Image &image)
@@ -764,34 +769,17 @@ namespace {
         // copy tags
         for (ExifData::const_iterator pos = exifData.begin(); pos != exifData.end(); ++pos) {
             if (pos->groupName() == group_) {
-
                 /*
-                   write only the neccessary tags
+                   Write only the neccessary TIFF image tags
                    tags that especially could cause problems are:
                    "NewSubfileType" - the result is no longer a thumbnail, it is a standalone image
                    "Orientation" - this tag typically appears only in the "Image" group. Deleting it ensures
                                    consistent result for all previews, including JPEG
                 */
-                std::string name = pos->tagName();
-                if (name != "ImageWidth" &&
-                    name != "ImageLength" &&
-                    name != "BitsPerSample" &&
-                    name != "Compression" &&
-                    name != "PhotometricInterpretation" &&
-                    name != "StripOffsets" &&
-                    name != "SamplesPerPixel" &&
-                    name != "RowsPerStrip" &&
-                    name != "StripByteCounts" &&
-                    name != "XResolution" &&
-                    name != "YResolution" &&
-                    name != "ResolutionUnit" &&
-                    name != "ColorMap" &&
-                    name != "TileWidth" &&
-                    name != "TileLength" &&
-                    name != "TileOffsets" &&
-                    name != "TileByteCounts") continue;
-
-                preview.add(ExifKey("Exif.Image." + pos->tagName()), &pos->value());
+                uint16_t tag = pos->tag();
+                if (tag != 0x00fe && tag != 0x00ff && Internal::isTiffImageTag(tag, Internal::ifd0Id)) {
+                    preview.add(ExifKey(tag, "Image"), &pos->value());
+                }
             }
         }
 
@@ -832,6 +820,11 @@ namespace {
                     dataValue.setDataArea(buf.pData_, buf.size_);
                 }
             }
+        }
+
+        // Fix compression value in the CR2 IFD2 image
+        if (0 == strcmp(group_, "Image2") && image_.mimeType() == "image/x-canon-cr2") {
+            preview["Exif.Image.Compression"] = uint16_t(1);
         }
 
         // write new image

@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:    pgfimage.cpp
-  Version: $Rev: 2522 $
+  Version: $Rev: 2681 $
   Author(s): Gilles Caulier (cgilles) <caulier dot gilles at gmail dot com>
   History: 16-Jun-09, gc: submitted
   Credits: See header file
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: pgfimage.cpp 2522 2011-06-28 00:38:12Z vog $")
+EXIV2_RCSID("@(#) $Id: pgfimage.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 

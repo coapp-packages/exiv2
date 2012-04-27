@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,7 +20,7 @@
  */
 /*
   File:      minoltamn.cpp
-  Version:   $Rev: 2453 $
+  Version:   $Rev: 2681 $
   Author(s): Gilles Caulier (cgilles) <caulier dot gilles at gmail dot com>
              Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   06-May-06, gc: submitted
@@ -29,7 +29,7 @@
 
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: minoltamn.cpp 2453 2011-02-13 14:08:44Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: minoltamn.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -1100,9 +1100,9 @@ namespace Exiv2 {
         { 8,    N_("White Balance Bracketing Low")  },
         { 9,    N_("White Balance Bracketing High") },
         { 770,  N_("Single-frame Bracketing Low")   },
-        { 771,  N_("Continous Bracketing Low")      },
+        { 771,  N_("Continuous Bracketing Low")     },
         { 1794, N_("Single-frame Bracketing High")  },
-        { 1795, N_("Continous Bracketing High")     }
+        { 1795, N_("Continuous Bracketing High")    }
     };
 
     //! Lookup table to translate Sony A100 camera settings focus mode values to readable labels

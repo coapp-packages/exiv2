@@ -2,7 +2,7 @@
 /*!
   @file    exv_msvc.h
   @brief   Configuration settings for MSVC
-  @version $Rev: 2588 $
+  @version $Rev: 2685 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    07-Feb-04, ahu: created
@@ -12,6 +12,11 @@
 /* Todo: The PACKAGE_* defines should be generated */
 
 #ifdef _MSC_VER
+
+#if _MSC_VER >= 1600
+// stdint.h was introduced with DevStudio 2010
+#define EXV_HAVE_STDINT_H 1
+#endif
 
 /* Define to 1 if you have the <process.h> header file. */
 #define EXV_HAVE_PROCESS_H 1
@@ -23,13 +28,13 @@
 #define EXV_PACKAGE_NAME "exiv2"
 
 /* Define to the full name and version of this package. */
-#define EXV_PACKAGE_STRING "exiv2 0.22"
+#define EXV_PACKAGE_STRING "exiv2 0.23"
 
 /* Define to the one symbol short name of this package. */
 #define EXV_PACKAGE_TARNAME "exiv2"
 
 /* Define to the version of this package. */
-#define EXV_PACKAGE_VERSION "0.22"
+#define EXV_PACKAGE_VERSION "0.23"
 
 /* Define to `int' if <sys/types.h> does not define pid_t. */
 typedef int pid_t;

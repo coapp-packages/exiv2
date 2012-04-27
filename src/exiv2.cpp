@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -22,13 +22,13 @@
   Abstract:  Command line program to display and manipulate image metadata.
 
   File:      exiv2.cpp
-  Version:   $Rev: 2597 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   10-Dec-03, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: exiv2.cpp 2597 2011-09-02 15:28:52Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: exiv2.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -209,7 +209,7 @@ void Params::version(std::ostream& os) const
     bool  b64    = sizeof(void*)==8;
     const char* sBuild = b64 ? "(64 bit build)" : "(32 bit build)" ;
     os << EXV_PACKAGE_STRING << " " << Exiv2::versionNumberHexString() << " " << sBuild << "\n"
-       << _("Copyright (C) 2004-2011 Andreas Huggel.\n")
+       << _("Copyright (C) 2004-2012 Andreas Huggel.\n")
        << "\n"
        << _("This program is free software; you can redistribute it and/or\n"
             "modify it under the terms of the GNU General Public License\n"
@@ -260,6 +260,7 @@ void Params::help(std::ostream& os) const
        << _("   -V      Show the program version and exit.\n")
        << _("   -v      Be verbose during the program run.\n")
        << _("   -q      Silence warnings and error messages during the program run (quiet).\n")
+       << _("   -Q lvl  Set log-level to d(ebug), i(nfo), w(arning), e(rror) or m(ute).\n")
        << _("   -b      Show large binary values.\n")
        << _("   -u      Show unknown tags.\n")
        << _("   -g key  Only output info for this key (grep).\n")
@@ -341,6 +342,7 @@ int Params::option(int opt, const std::string& optarg, int optopt)
     case 'V': version_ = true; break;
     case 'v': verbose_ = true; break;
     case 'q': Exiv2::LogMsg::setLevel(Exiv2::LogMsg::mute); break;
+    case 'Q': rc = setLogLevel(optarg); break;
     case 'k': preserve_ = true; break;
     case 'b': binary_ = false; break;
     case 'u': unknown_ = false; break;
@@ -384,6 +386,25 @@ int Params::option(int opt, const std::string& optarg, int optopt)
     }
     return rc;
 } // Params::option
+
+int Params::setLogLevel(const std::string& optarg)
+{
+    int rc = 0;
+    const char logLevel = tolower(optarg[0]);
+    switch (logLevel) {
+    case 'd': Exiv2::LogMsg::setLevel(Exiv2::LogMsg::debug); break;
+    case 'i': Exiv2::LogMsg::setLevel(Exiv2::LogMsg::info); break;
+    case 'w': Exiv2::LogMsg::setLevel(Exiv2::LogMsg::warn); break;
+    case 'e': Exiv2::LogMsg::setLevel(Exiv2::LogMsg::error); break;
+    case 'm': Exiv2::LogMsg::setLevel(Exiv2::LogMsg::mute); break;
+    default:
+        std::cerr << progname() << ": " << _("Option") << " -Q: "
+                  << _("Invalid argument") << " \"" << optarg << "\"\n";
+        rc = 1;
+        break;
+    }
+    return rc;
+} // Params::setLogLevel
 
 int Params::evalRename(int opt, const std::string& optarg)
 {
@@ -1077,21 +1098,24 @@ namespace {
         bool explicitType = false;
         if (cmdId != del) {
             // Get type and value
-            std::string::size_type typeStart
-                = line.find_first_not_of(delim, keyEnd+1);
-            std::string::size_type typeEnd
-                = line.find_first_of(delim, typeStart+1);
+            std::string::size_type typeStart = std::string::npos;
+            if (keyEnd != std::string::npos) typeStart = line.find_first_not_of(delim, keyEnd+1);
+            std::string::size_type typeEnd = std::string::npos;
+            if (typeStart != std::string::npos) typeEnd = line.find_first_of(delim, typeStart+1);
             std::string::size_type valStart = typeStart;
-            std::string::size_type valEnd = line.find_last_not_of(delim);
+            std::string::size_type valEnd = std::string::npos;
+            if (valStart != std::string::npos) valEnd = line.find_last_not_of(delim);
 
-            if (   keyEnd == std::string::npos
-                || typeStart == std::string::npos
-                || valStart == std::string::npos) {
+            if (   cmdId == reg
+                && (   keyEnd == std::string::npos
+                    || valStart == std::string::npos)) {
                 throw Exiv2::Error(1, Exiv2::toString(num)
                                    + ": " + _("Invalid command line") + " " );
             }
 
-            if (cmdId != reg && typeEnd != std::string::npos) {
+            if (   cmdId != reg
+                && typeStart != std::string::npos
+                && typeEnd != std::string::npos) {
                 std::string typeStr(line.substr(typeStart, typeEnd-typeStart));
                 Exiv2::TypeId tmpType = Exiv2::TypeInfo::typeId(typeStr);
                 if (tmpType != Exiv2::invalidTypeId) {
@@ -1105,11 +1129,13 @@ namespace {
                 }
             }
 
-            value = parseEscapes(line.substr(valStart, valEnd+1-valStart));
-            std::string::size_type last = value.length()-1;
-            if (   (value[0] == '"' && value[last] == '"')
-                || (value[0] == '\'' && value[last] == '\'')) {
-                value = value.substr(1, value.length()-2);
+            if (valStart != std::string::npos) {
+                value = parseEscapes(line.substr(valStart, valEnd+1-valStart));
+                std::string::size_type last = value.length()-1;
+                if (   (value[0] == '"' && value[last] == '"')
+                       || (value[0] == '\'' && value[last] == '\'')) {
+                    value = value.substr(1, value.length()-2);
+                }
             }
         }
 

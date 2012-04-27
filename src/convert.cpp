@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,7 +20,7 @@
  */
 /*
   File:      convert.cpp
-  Version:   $Rev: 2614 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
              Vladimir Nadvornik (vn) <nadvornik@suse.cz>
   History:   17-Mar-08, ahu: created basic converter framework
@@ -28,7 +28,7 @@
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: convert.cpp 2614 2011-09-17 08:22:57Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: convert.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -591,7 +591,7 @@ namespace Exiv2 {
             double dhour = pos->toFloat(0);
             double dmin = pos->toFloat(1);
             // Hack: Need Value::toDouble
-            URational r = pos->toRational(2);
+            Rational r = pos->toRational(2);
             double dsec = static_cast<double>(r.first)/r.second;
 
             if (!pos->value().ok()) {

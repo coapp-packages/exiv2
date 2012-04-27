@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    jpgimage.hpp
   @brief   Class JpegImage to access JPEG images
-  @version $Rev: 2558 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @author  Brad Schick (brad)
@@ -64,10 +64,21 @@ namespace Exiv2 {
     struct EXIV2API Photoshop {
         // Todo: Public for now
         static const char     ps3Id_[]; //!< %Photoshop marker
-        static const char     bimId_[]; //!< %Photoshop marker
+        static const char*    irbId_[]; //!< %Photoshop IRB markers
+        static const char     bimId_[]; //!< %Photoshop IRB marker (deprecated)
         static const uint16_t iptc_;    //!< %Photoshop IPTC marker
         static const uint16_t preview_; //!< %Photoshop preview marker
 
+        /*!
+          @brief Checks an IRB
+
+          @param pPsData        Existing IRB buffer
+          @param sizePsData     Size of the IRB buffer
+          @return true  if the IRB marker is known and the buffer is big enough to check this;<BR>
+                  false otherwise
+        */
+        static bool isIrb(const byte* pPsData,
+                          long        sizePsData);
         /*!
           @brief Validates all IRBs
 

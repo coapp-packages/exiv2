@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    error.hpp
   @brief   Error class for exceptions, log message class
-  @version $Rev: 2453 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    15-Jan-04, ahu: created<BR>
@@ -110,7 +110,7 @@ namespace Exiv2 {
         /*!
           @brief Set the log level. Only log messages with a level greater or
                  equal \em level are sent to the log message handler. Default
-                 log level is \c info. To suppress all log messages, set the log
+                 log level is \c warn. To suppress all log messages, set the log
                  level to \c mute (or set the log message handler to 0).
         */
         static void setLevel(Level level) { level_ = level; }

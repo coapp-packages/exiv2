@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      properties.cpp
-  Version:   $Rev: 2460 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
              Gilles Caulier (cgilles) <caulier dot gilles at gmail dot com>
   History:   13-July-07, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: properties.cpp 2460 2011-02-15 12:40:20Z cgilles $")
+EXIV2_RCSID("@(#) $Id: properties.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -45,6 +45,7 @@ EXIV2_RCSID("@(#) $Id: properties.cpp 2460 2011-02-15 12:40:20Z cgilles $")
 #include <sstream>
 #include <cstring>
 #include <cstdlib>
+#include <cctype>
 
 // *****************************************************************************
 namespace {
@@ -91,6 +92,10 @@ namespace Exiv2 {
     extern const XmpPropertyInfo xmpPlusInfo[];
     extern const XmpPropertyInfo xmpMediaProInfo[];
     extern const XmpPropertyInfo xmpExpressionMediaInfo[];
+    extern const XmpPropertyInfo xmpMicrosoftPhotoInfo[];
+    extern const XmpPropertyInfo xmpMicrosoftPhotoRegionInfoInfo[];
+    extern const XmpPropertyInfo xmpMicrosoftPhotoRegionInfo[];
+    extern const XmpPropertyInfo xmpMWGRegionsInfo[];
 
     extern const XmpNsInfo xmpNsInfo[] = {
         // Schemas   -   NOTE: Schemas which the XMP-SDK doesn't know must be registered in XmpParser::initialize - Todo: Automate this
@@ -110,13 +115,17 @@ namespace Exiv2 {
         { "http://ns.adobe.com/tiff/1.0/",                "tiff",           xmpTiffInfo,      N_("Exif Schema for TIFF Properties")           },
         { "http://ns.adobe.com/exif/1.0/",                "exif",           xmpExifInfo,      N_("Exif schema for Exif-specific Properties")  },
         { "http://ns.adobe.com/exif/1.0/aux/",            "aux",            xmpAuxInfo,       N_("Exif schema for Additional Exif Properties")},
-        { "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/",  "iptc",           xmpIptcInfo,      N_("IPTC Core schema")                          },
-                                                                                             // NOTE: 'Iptc4xmpCore' is just too long
-        { "http://iptc.org/std/Iptc4xmpExt/2008-02-29/",  "iptcExt",        xmpIptcExtInfo,   N_("IPTC Extension schema")                     },
-                                                                                             // NOTE: It really should be 'Iptc4xmpExt' but following example above
+        { "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/",  "iptc",           xmpIptcInfo,      N_("IPTC Core schema")                          }, // NOTE: 'Iptc4xmpCore' is just too long, so make 'iptc'
+        { "http://iptc.org/std/Iptc4xmpCore/1.0/xmlns/",  "Iptc4xmpCore",   xmpIptcInfo,      N_("IPTC Core schema")                          }, // the default prefix. But provide the official one too.
+        { "http://iptc.org/std/Iptc4xmpExt/2008-02-29/",  "iptcExt",        xmpIptcExtInfo,   N_("IPTC Extension schema")                     }, // NOTE: It really should be 'Iptc4xmpExt' but following
+        { "http://iptc.org/std/Iptc4xmpExt/2008-02-29/",  "Iptc4xmpExt",    xmpIptcExtInfo,   N_("IPTC Extension schema")                     }, // example above, 'iptcExt' is the default, Iptc4xmpExt works too.
         { "http://ns.useplus.org/ldf/xmp/1.0/",           "plus",           xmpPlusInfo,      N_("PLUS License Data Format schema")           },
         { "http://ns.iview-multimedia.com/mediapro/1.0/", "mediapro",       xmpMediaProInfo,  N_("iView Media Pro schema")                    },
         { "http://ns.microsoft.com/expressionmedia/1.0/", "expressionmedia",xmpExpressionMediaInfo, N_("Expression Media schema")             },
+        { "http://ns.microsoft.com/photo/1.2/",              "MP",    xmpMicrosoftPhotoInfo,           N_("Microsoft Photo 1.2 schema")       },
+        { "http://ns.microsoft.com/photo/1.2/t/RegionInfo#", "MPRI",  xmpMicrosoftPhotoRegionInfoInfo, N_("Microsoft Photo RegionInfo schema")},
+        { "http://ns.microsoft.com/photo/1.2/t/Region#",     "MPReg", xmpMicrosoftPhotoRegionInfo,     N_("Microsoft Photo Region schema")    },
+        { "http://www.metadataworkinggroup.com/schemas/regions/", "mwg-rs", xmpMWGRegionsInfo,N_("Metadata Working Group Regions schema")     },
 
         // Structures
         { "http://ns.adobe.com/xap/1.0/g/",                   "xapG",    0, N_("Colorant structure")           },
@@ -127,6 +136,7 @@ namespace Exiv2 {
         { "http://ns.adobe.com/xap/1.0/sType/ResourceRef#",   "stRef",   0, N_("ResourceRef structure")        },
         { "http://ns.adobe.com/xap/1.0/sType/Version#",       "stVer",   0, N_("Version structure")            },
         { "http://ns.adobe.com/xap/1.0/sType/Job#",           "stJob",   0, N_("Basic Job/Workflow structure") },
+        { "http://ns.adobe.com/xmp/sType/Area#",              "stArea",  0, N_("Area structure")               },
 
         // Qualifiers
         { "http://ns.adobe.com/xmp/Identifier/qual/1.0/", "xmpidq", 0, N_("Qualifier for xmp:Identifier") }
@@ -178,6 +188,8 @@ namespace Exiv2 {
     extern const XmpPropertyInfo xmpKipiInfo[] = {
         { "EnfuseInputFiles",       N_("Enfuse Input Files"),        "Text",     xmpText, xmpExternal, N_("The list of files processed with Enfuse program through ExpoBlending tool.") },
         { "EnfuseSettings",         N_("Enfuse Settings"),           "Text",     xmpText, xmpExternal, N_("The list of Enfuse settings used to blend image stack with ExpoBlending tool.") },
+        { "picasawebGPhotoId",      N_("PicasaWeb Item ID"),         "Text",     xmpText, xmpExternal, N_("Item ID from PicasaWeb web service.") },
+        { "yandexGPhotoId",         N_("Yandex Fotki Item ID"),      "Text",     xmpText, xmpExternal, N_("Item ID from Yandex Fotki web service.") },
         // End of list marker
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
     };
@@ -211,7 +223,7 @@ namespace Exiv2 {
         { "Rating",           N_("Rating"),           "Closed Choice of Integer", xmpText,   xmpExternal, N_("A number that indicates a document's status relative to other documents, "
                                                                                                              "used to organize documents in a file browser. Values are user-defined within an "
                                                                                                              "application-defined range.") },
-        { "Thumbnails",       N_("Thumbnails"),       "alt Thumbnail",            undefined, xmpInternal, N_("An alternative array of thumbnail images for a file, which can differ in "
+        { "Thumbnails",       N_("Thumbnails"),       "alt Thumbnail",            xmpText, xmpInternal, N_("An alternative array of thumbnail images for a file, which can differ in "
                                                                                                              "characteristics such as size or image encoding.") },
         // End of list marker
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
@@ -937,6 +949,43 @@ namespace Exiv2 {
         { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
     };
 
+    extern const XmpPropertyInfo xmpMicrosoftPhotoInfo[] = {
+        { "RegionInfo", N_("RegionInfo"), "RegionInfo", xmpText, xmpInternal, N_("Microsoft Photo people-tagging metadata root") },
+        // End of list marker
+        { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
+    };
+
+    extern const XmpPropertyInfo xmpMicrosoftPhotoRegionInfoInfo[] = {
+        { "DateRegionsValid", N_("DateRegionsValid"), "Date",       xmpText, xmpExternal, N_("Date the last region was created")  },
+        { "Regions",          N_("Regions"),          "bag Region", xmpBag,  xmpExternal, N_("Contains Regions/person tags") },
+        // End of list marker
+        { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
+    };
+
+    extern const XmpPropertyInfo xmpMicrosoftPhotoRegionInfo[] = {
+        { "PersonDisplayName", N_("PersonDisplayName"), "Text", xmpText, xmpExternal, N_("Name of the person (in the given rectangle)")                               },
+        { "Rectangle",         N_("Rectangle"),         "Text", xmpText, xmpExternal, N_("Rectangle that identifies the person within the photo")                     },
+        { "PersonEmailDigest", N_("PersonEmailDigest"), "Text", xmpText, xmpExternal, N_("SHA-1 encrypted message hash of the person's Windows Live e-mail address"), },
+        { "PersonLiveCID",     N_("PersonLiveCID"),     "Text", xmpText, xmpExternal, N_("Signed decimal representation of the person's Windows Live CID")            },
+        // End of list marker
+        { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
+    };
+
+    extern const XmpPropertyInfo xmpMWGRegionsInfo[] = {
+        { "Regions",             N_("Regions"),             "RegionInfo",       xmpText, xmpInternal,        N_("Main structure containing region based information")   },
+        { "AppliedToDimensions", N_("AppliedToDimensions"), "Dimensions",       xmpText, xmpExternal,        N_("Width and height of image when storing region data")   },
+        { "RegionList",          N_("RegionList"),          "bag RegionStruct", xmpBag,  xmpExternal,        N_("List of Region structures")                            },
+        { "Area",                N_("Area"),                "Area",             xmpText, xmpExternal,        N_("Descriptive markers of catalog items by content")      },
+        { "Type",                N_("Type"),                "closed Choice of Text", xmpText, xmpExternal,   N_("Type purpose of region (Face|Pet|Focus|BarCode)")      },
+        { "Name",                N_("Name"),                "Text",             xmpText, xmpExternal,        N_("Name/ short description of content in image region")   },
+        { "Description",         N_("Description"),         "Text",             xmpText, xmpExternal,        N_("Usage scenario for a given focus area (EvaluatedUsed|EvaluatedNotUsed|NotEvaluatedNotUsed)") },
+        { "FocusUsage",          N_("FocusUsage"),          "closed Choice of Text", xmpText, xmpExternal,   N_("Descriptive markers of catalog items by content")      },
+        { "BarCodeValue",        N_("BarCodeValue"),        "Text",             xmpText, xmpExternal,        N_("Decoded BarCode value string")                         },
+        { "Extensions",          N_("Extensions"),          "Text",             xmpText, xmpInternal, N_("Any top level XMP property to describe the region content") },
+        // End of list marker
+        { 0, 0, 0, invalidTypeId, xmpInternal, 0 }
+    };
+
     extern const XmpPrintInfo xmpPrintInfo[] = {
         {"Xmp.crs.CropUnits",                 EXV_PRINT_TAG(crsCropUnits)   },
         {"Xmp.exif.ApertureValue",            print0x9202                   },
@@ -1061,7 +1110,7 @@ namespace Exiv2 {
         }
         // Allocated memory is freed when the namespace is unregistered.
         // Using malloc/free for better system compatibility in case
-        // users don't unregister their namespaces explicitely.
+        // users don't unregister their namespaces explicitly.
         XmpNsInfo xn;
         char* c = static_cast<char*>(std::malloc(ns2.size() + 1));
         std::strcpy(c, ns2.c_str());
@@ -1137,11 +1186,28 @@ namespace Exiv2 {
 
     const XmpPropertyInfo* XmpProperties::propertyInfo(const XmpKey& key)
     {
-        const XmpPropertyInfo* pl = propertyList(key.groupName());
+        std::string prefix = key.groupName();
+        std::string property = key.tagName();
+        // If property is a path for a nested property, determines the innermost element
+        std::string::size_type i = property.find_last_of('/');
+        if (i != std::string::npos) {
+            for (; i != std::string::npos && !isalpha(property[i]); ++i) {}
+            property = property.substr(i);
+            i = property.find_first_of(':');
+            if (i != std::string::npos) {
+                prefix = property.substr(0, i);
+                property = property.substr(i+1);
+            }
+#ifdef DEBUG
+            std::cout << "Nested key: " << key.key() << ", prefix: " << prefix
+                      << ", property: " << property << "\n";
+#endif
+        }
+        const XmpPropertyInfo* pl = propertyList(prefix);
         if (!pl) return 0;
         const XmpPropertyInfo* pi = 0;
         for (int i = 0; pl[i].name_ != 0; ++i) {
-            if (0 == strcmp(pl[i].name_, key.tagName().c_str())) {
+            if (0 == strcmp(pl[i].name_, property.c_str())) {
                 pi = pl + i;
                 break;
             }

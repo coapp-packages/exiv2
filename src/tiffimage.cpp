@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      tiffimage.cpp
-  Version:   $Rev: 2527 $
+  Version:   $Rev: 2701 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   15-Mar-06, ahu: created
 
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: tiffimage.cpp 2527 2011-06-29 01:02:04Z robinwmills $")
+EXIV2_RCSID("@(#) $Id: tiffimage.cpp 2701 2012-04-13 14:08:56Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -80,17 +80,20 @@ namespace Exiv2 {
     using namespace Internal;
 
     TiffImage::TiffImage(BasicIo::AutoPtr io, bool /*create*/)
-        : Image(ImageType::tiff, mdExif | mdIptc, io),
+        : Image(ImageType::tiff, mdExif | mdIptc | mdXmp, io),
           pixelWidth_(0), pixelHeight_(0)
     {
     } // TiffImage::TiffImage
 
+    //! Structure for TIFF compression to MIME type mappings
     struct MimeTypeList {
+        //! Comparison operator for compression
         bool operator==(int compression) const { return compression_ == compression; }
-        int compression_;
-        const char* mimeType_;
+        int compression_;                       //!< TIFF compression
+        const char* mimeType_;                  //!< MIME type
     };
 
+    //! List of TIFF compression to MIME type mappings
     MimeTypeList mimeTypeList[] = {
         { 32770, "image/x-samsung-srw" },
         { 34713, "image/x-nikon-nef"   },
@@ -273,7 +276,8 @@ namespace Exiv2 {
                                         xmpData,
                                         Tag::root,
                                         TiffMapping::findEncoder,
-                                        header.get());
+                                        header.get(),
+                                        0);
     } // TiffParser::encode
 
     // *************************************************************************
@@ -535,6 +539,24 @@ namespace Exiv2 {
         { 24, ttUnsignedShort, 1 }, // AFAreaWidth
         { 26, ttUnsignedShort, 1 }, // AFAreaHeight
         { 28, ttUnsignedShort, 1 }, // ContrastDetectAFInFocus
+    };
+    
+    //! Nikon AF Fine Tune binary array - configuration
+    extern const ArrayCfg nikonAFTCfg = {
+        nikonAFTId,       // Group for the elements
+        littleEndian,     // Byte order
+        ttUndefined,      // Type for array entry
+        notEncrypted,     // Not encrypted
+        false,            // No size element
+        true,             // Write all tags
+        true,             // Concatenate gaps
+        { 0, ttUnsignedByte,  1 }
+    };
+    //! Nikon AF Fine Tune binary array - definition
+    extern const ArrayDef nikonAFTDef[] = {
+        {  0, ttUnsignedByte,  1 }, // AF Fine Tune on/off
+        {  1, ttUnsignedByte,  1 }, // AF Fine Tune index
+        {  2, ttUnsignedByte,  1 }  // AF Fine Tune value
     };
 
     //! Nikon File Info binary array - configuration
@@ -1099,6 +1121,26 @@ namespace Exiv2 {
         { 190, ttSignedShort, 1 }  // Exif.Sony1MltCsA100.ColorCompensationFilter2
     };
 
+    //! Samsung PictureWizard binary array - configuration
+    extern const ArrayCfg samsungPwCfg = {
+        samsungPwId,      // Group for the elements
+        invalidByteOrder, // Use byte order from parent
+        ttUnsignedShort,  // Type for array entry
+        notEncrypted,     // Not encrypted
+        false,            // No size element
+        true,             // Write all tags
+        true,             // Concatenate gaps
+        { 0, ttUnsignedShort, 1 }
+    };
+    //! Samsung PictureWizard binary array - definition
+    extern const ArrayDef samsungPwDef[] = {
+        {  0, ttUnsignedShort, 1 }, // Mode
+        {  2, ttUnsignedShort, 1 }, // Color
+        {  4, ttUnsignedShort, 1 }, // Saturation
+        {  6, ttUnsignedShort, 1 }, // Sharpness
+        {  8, ttUnsignedShort, 1 }  // Contrast
+    };
+
     /*
       This table lists for each group in a tree, its parent group and tag.
       Root identifies the root of a TIFF tree, as there is a need for multiple
@@ -1183,12 +1225,15 @@ namespace Exiv2 {
         { Tag::root, nikonMeId,        nikon3Id,         0x00b0    },
         { Tag::root, nikonAf2Id,       nikon3Id,         0x00b7    },
         { Tag::root, nikonFiId,        nikon3Id,         0x00b8    },
+        { Tag::root, nikonAFTId,       nikon3Id,         0x00b9    },
         { Tag::root, nikonFl1Id,       nikon3Id,         0x00a8    },
         { Tag::root, nikonFl2Id,       nikon3Id,         0x00a8    },
         { Tag::root, nikonFl3Id,       nikon3Id,         0x00a8    },
         { Tag::root, panasonicId,      exifId,           0x927c    },
         { Tag::root, pentaxId,         exifId,           0x927c    },
+        { Tag::root, pentaxDngId,      ifd0Id,           0xc634    },
         { Tag::root, samsung2Id,       exifId,           0x927c    },
+        { Tag::root, samsungPwId,      samsung2Id,       0x0021    },
         { Tag::root, samsungPvId,      samsung2Id,       0x0035    },
         { Tag::root, sigmaId,          exifId,           0x927c    },
         { Tag::root, sony1Id,          exifId,           0x927c    },
@@ -1242,6 +1287,7 @@ namespace Exiv2 {
         {    0x0201, ifd0Id,           newTiffImageData<0x0202, ifd0Id>          },
         {    0x0202, ifd0Id,           newTiffImageSize<0x0201, ifd0Id>          },
         {    0x014a, ifd0Id,           newTiffSubIfd<subImage1Id>                },
+        {    0xc634, ifd0Id,           newTiffMnEntry                            },
         { Tag::next, ifd0Id,           newTiffDirectory<ifd1Id>                  },
         {  Tag::all, ifd0Id,           newTiffEntry                              },
 
@@ -1516,6 +1562,7 @@ namespace Exiv2 {
         {    0x00b0, nikon3Id,         EXV_BINARY_ARRAY(nikonMeCfg, nikonMeDef)  },
         {    0x00b7, nikon3Id,         EXV_BINARY_ARRAY(nikonAf2Cfg, nikonAf2Def)},
         {    0x00b8, nikon3Id,         EXV_BINARY_ARRAY(nikonFiCfg, nikonFiDef)  },
+        {    0x00b9, nikon3Id,         EXV_BINARY_ARRAY(nikonAFTCfg, nikonAFTDef)  },
         {  Tag::all, nikon3Id,         newTiffEntry                              },
 
         // Nikon3 makernote preview subdir
@@ -1541,6 +1588,9 @@ namespace Exiv2 {
         
         // Nikon3 auto focus 2
         {  Tag::all, nikonAf2Id,       newTiffBinaryElement                      },
+        
+        // Nikon3 AF Fine Tune
+        {  Tag::all, nikonAFTId,       newTiffBinaryElement                      },
         
         // Nikon3 file info
         {  Tag::all, nikonFiId,        newTiffBinaryElement                      },
@@ -1578,6 +1628,12 @@ namespace Exiv2 {
         { Tag::next, panasonicId,      newTiffDirectory<ignoreId>                },
         {  Tag::all, panasonicId,      newTiffEntry                              },
 
+        // Pentax DNG makernote
+        {    0x0003, pentaxDngId,      newTiffThumbSize<0x0004, pentaxDngId>     },
+        {    0x0004, pentaxDngId,      newTiffThumbData<0x0003, pentaxDngId>     },
+        { Tag::next, pentaxDngId,      newTiffDirectory<ignoreId>                },
+        {  Tag::all, pentaxDngId,      newTiffEntry                              },
+
         // Pentax makernote
         {    0x0003, pentaxId,         newTiffThumbSize<0x0004, pentaxId>        },
         {    0x0004, pentaxId,         newTiffThumbData<0x0003, pentaxId>        },
@@ -1585,9 +1641,13 @@ namespace Exiv2 {
         {  Tag::all, pentaxId,         newTiffEntry                              },
 
         // Samsung2 makernote
+        {    0x0021, samsung2Id,       EXV_BINARY_ARRAY(samsungPwCfg, samsungPwDef) },
         {    0x0035, samsung2Id,       newTiffSubIfd<samsungPvId>                },
         { Tag::next, samsung2Id,       newTiffDirectory<ignoreId>                },
         {  Tag::all, samsung2Id,       newTiffEntry                              },
+
+        // Samsung PictureWizard binary array
+        {  Tag::all, samsungPwId,      newTiffBinaryElement                      },
 
         // Samsung2 makernote preview subdir
         {    0x0201, samsungPvId,      newTiffThumbData<0x0202, samsungPvId>     },
@@ -1792,7 +1852,8 @@ namespace Exiv2 {
         const XmpData&           xmpData,
               uint32_t           root,
               FindEncoderFct     findEncoderFct,
-              TiffHeaderBase*    pHeader
+              TiffHeaderBase*    pHeader,
+              OffsetWriter*      pOffsetWriter
     )
     {
         /*
@@ -1842,7 +1903,7 @@ namespace Exiv2 {
             DataBuf header = pHeader->write();
             BasicIo::AutoPtr tempIo(io.temporary()); // may throw
             assert(tempIo.get() != 0);
-            IoWrapper ioWrapper(*tempIo, header.pData_, header.size_);
+            IoWrapper ioWrapper(*tempIo, header.pData_, header.size_, pOffsetWriter);
             uint32_t imageIdx(uint32_t(-1));
             createdTree->write(ioWrapper,
                                pHeader->byteOrder(),
@@ -1850,14 +1911,15 @@ namespace Exiv2 {
                                uint32_t(-1),
                                uint32_t(-1),
                                imageIdx);
+            if (pOffsetWriter) pOffsetWriter->writeOffsets(*tempIo);
             io.transfer(*tempIo); // may throw
-#ifdef DEBUG
-            std::cerr << "Intrusive writing\n";
+#ifndef SUPPRESS_WARNINGS
+            EXV_INFO << "Write strategy: Intrusive\n";
 #endif
         }
-#ifdef DEBUG
+#ifndef SUPPRESS_WARNINGS
         else {
-            std::cerr << "Non-intrusive writing\n";
+            EXV_INFO << "Write strategy: Non-intrusive\n";
         }
 #endif
         return writeMethod;
@@ -2029,19 +2091,7 @@ namespace Exiv2 {
         return false;
     }
 
-    TiffHeader::TiffHeader(ByteOrder byteOrder, uint32_t offset, bool hasImageTags)
-        : TiffHeaderBase(42, 8, byteOrder, offset),
-          hasImageTags_(hasImageTags)
-    {
-    }
-
-    TiffHeader::~TiffHeader()
-    {
-    }
-
-    bool TiffHeader::isImageTag(      uint16_t       tag,
-                                      IfdId          group,
-                                const PrimaryGroups* pPrimaryGroups) const
+    bool isTiffImageTag(uint16_t tag, IfdId group)
     {
         //! List of TIFF image tags
         static const TiffImgTagStruct tiffImageTags[] = {
@@ -2112,6 +2162,34 @@ namespace Exiv2 {
             { 0x9217, ifd0Id }, // Exif.Image.SensingMethod
         };
 
+        // If tag, group is one of the image tags listed above -> bingo!
+        if (find(tiffImageTags, TiffImgTagStruct::Key(tag, group))) {
+#ifdef DEBUG
+            ExifKey key(tag, groupName(group));
+            std::cerr << "Image tag: " << key << " (3)\n";
+#endif
+            return true;
+        }
+#ifdef DEBUG
+        std::cerr << "Not an image tag: " << key << " (4)\n";
+#endif
+        return false;
+    }
+
+    TiffHeader::TiffHeader(ByteOrder byteOrder, uint32_t offset, bool hasImageTags)
+        : TiffHeaderBase(42, 8, byteOrder, offset),
+          hasImageTags_(hasImageTags)
+    {
+    }
+
+    TiffHeader::~TiffHeader()
+    {
+    }
+
+    bool TiffHeader::isImageTag(      uint16_t       tag,
+                                      IfdId          group,
+                                const PrimaryGroups* pPrimaryGroups) const
+    {
         if (!hasImageTags_) {
 #ifdef DEBUG
             std::cerr << "No image tags in this image\n";
@@ -2142,18 +2220,29 @@ namespace Exiv2 {
 #endif
             return true;
         }
-        // If tag, group is one of the image tags listed above -> bingo!
-        if (find(tiffImageTags, TiffImgTagStruct::Key(tag, group))) {
-#ifdef DEBUG
-            ExifKey key(tag, groupName(group));
-            std::cerr << "Image tag: " << key << " (3)\n";
-#endif
-            return true;
+        // Finally, if tag, group is one of the TIFF image tags -> bingo!
+        return isTiffImageTag(tag, group);
+    } // TiffHeader::isImageTag
+
+    void OffsetWriter::setOrigin(OffsetId id, uint32_t origin, ByteOrder byteOrder)
+    {
+        offsetList_[id] = OffsetData(origin, byteOrder);
+    }
+
+    void OffsetWriter::setTarget(OffsetId id, uint32_t target)
+    {
+        OffsetList::iterator it = offsetList_.find(id);
+        if (it != offsetList_.end()) it->second.target_ = target;
+    }
+
+    void OffsetWriter::writeOffsets(BasicIo& io) const
+    {
+        for (OffsetList::const_iterator it = offsetList_.begin(); it != offsetList_.end(); ++it) {
+            io.seek(it->second.origin_, BasicIo::beg);
+            byte buf[4] = { 0, 0, 0, 0 };
+            l2Data(buf, it->second.target_, it->second.byteOrder_);
+            io.write(buf, 4);
         }
-#ifdef DEBUG
-        std::cerr << "Not an image tag: " << key << " (4)\n";
-#endif
-        return false;
     }
 
 }}                                       // namespace Internal, Exiv2

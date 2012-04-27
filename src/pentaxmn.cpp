@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,7 +20,7 @@
  */
 /*
   File:      pentaxmn.cpp
-  Version:   $Rev: 2453 $
+  Version:   $Rev: 2681 $
   Author(s): Michal Cihar <michal@cihar.com>
   Based on fujimn.cpp by:
              Andreas Huggel (ahu) <ahuggel@gmx.net>
@@ -30,7 +30,7 @@
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: pentaxmn.cpp 2453 2011-02-13 14:08:44Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: pentaxmn.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files

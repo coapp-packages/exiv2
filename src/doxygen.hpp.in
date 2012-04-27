@@ -2,7 +2,7 @@
 /*!
   @file    doxygen.hpp
   @brief   Additional documentation, this file contains no source code
-  @version $Rev: 2453 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    07-Feb-04, ahu: created
@@ -78,6 +78,10 @@
   - <a href="tags-xmp-MicrosoftPhoto.html">MicrosoftPhoto schema</a>
   - <a href="tags-xmp-mediapro.html">iView Media Pro schema</a>
   - <a href="tags-xmp-expressionmedia.html">Microsoft Expression Media schema</a>
+  - <a href="tags-xmp-MP.html">Microsoft Photo 1.2 schema</a>
+  - <a href="tags-xmp-MPRI.html">Microsoft Photo RegionInfo schema</a>
+  - <a href="tags-xmp-MPReg.html">Microsoft Photo Region schema</a>
+  - <a href="tags-xmp-mwg-rs.html">Metadata Working Group Regions schema</a>
 
   @section formats File Formats
 
@@ -94,7 +98,7 @@
 
   @section license License
 
-  <P>Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net></P>
+  <P>Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net></P>
 
   <P>%Exiv2 is free software; you can redistribute it and/or modify it under the
   terms of the <a href="gpl-license.html">GNU General Public License</a> as

@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      exif.cpp
-  Version:   $Rev: 2453 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   26-Jan-04, ahu: created
              11-Feb-04, ahu: isolated as a component
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: exif.cpp 2453 2011-02-13 14:08:44Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: exif.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -720,7 +720,8 @@ namespace Exiv2 {
                                                   emptyXmp,
                                                   Tag::root,
                                                   TiffMapping::findEncoder,
-                                                  header.get());
+                                                  header.get(),
+                                                  0);
         if (mio1.size() <= 65527) {
             append(blob, mio1.mmap(), mio1.size());
             return wm;
@@ -817,7 +818,8 @@ namespace Exiv2 {
                                       emptyXmp,
                                       Tag::root,
                                       TiffMapping::findEncoder,
-                                      header.get());
+                                      header.get(),
+                                      0);
         append(blob, mio2.mmap(), mio2.size());
 #ifdef DEBUG
         if (wm == wmIntrusive) {

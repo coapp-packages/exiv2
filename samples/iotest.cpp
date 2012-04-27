@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -23,7 +23,7 @@
         since FileIo just sits atop of FILE* streams.
 
   File     : iotest.cpp
-  Version  : $Rev: 2453 $
+  Version  : $Rev: 2681 $
   Author(s): Brad Schick (brad) <brad@robotbattle.com>
   History  : 04-Dec-04, brad: created
  */

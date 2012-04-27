@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      orfimage.cpp
-  Version:   $Rev: 2527 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   13-May-06, ahu: created
   Credits:   See header file
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: orfimage.cpp 2527 2011-06-29 01:02:04Z robinwmills $")
+EXIV2_RCSID("@(#) $Id: orfimage.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -59,7 +59,7 @@ namespace Exiv2 {
     using namespace Internal;
 
     OrfImage::OrfImage(BasicIo::AutoPtr io, bool /*create*/)
-        : Image(ImageType::orf, mdExif | mdIptc, io)
+        : Image(ImageType::orf, mdExif | mdIptc | mdXmp, io)
     {
     } // OrfImage::OrfImage
 
@@ -197,7 +197,8 @@ namespace Exiv2 {
                                         xmpData,
                                         Tag::root,
                                         TiffMapping::findEncoder,
-                                        header.get());
+                                        header.get(),
+                                        0);
     }
 
     // *************************************************************************
