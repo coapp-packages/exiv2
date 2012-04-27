@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      tiffcomposite.cpp
-  Version:   $Rev: 2595 $
+  Version:   $Rev: 2699 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   11-Apr-06, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: tiffcomposite.cpp 2595 2011-09-02 14:47:54Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: tiffcomposite.cpp 2699 2012-04-11 16:02:52Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -69,8 +69,8 @@ namespace Exiv2 {
                && key.g_ == group_;
     }
 
-    IoWrapper::IoWrapper(BasicIo& io, const byte* pHeader, long size)
-        : io_(io), pHeader_(pHeader), size_(size), wroteHeader_(false)
+    IoWrapper::IoWrapper(BasicIo& io, const byte* pHeader, long size, OffsetWriter* pow)
+        : io_(io), pHeader_(pHeader), size_(size), wroteHeader_(false), pow_(pow)
     {
         if (pHeader_ == 0 || size_ == 0) wroteHeader_ = true;
     }
@@ -91,6 +91,11 @@ namespace Exiv2 {
             wroteHeader_ = true;
         }
         return io_.putb(data);
+    }
+
+    void IoWrapper::setTarget(int id, uint32_t target)
+    {
+        if (pow_) pow_->setTarget(OffsetWriter::OffsetId(id), target);
     }
 
     TiffComponent::TiffComponent(uint16_t tag, IfdId group)
@@ -1029,7 +1034,7 @@ namespace Exiv2 {
         }
         // Count of IFD makernote in tag Exif.Photo.MakerNote is the size of the
         // Makernote in bytes
-        assert(tiffType() == ttUndefined);
+        assert(tiffType() == ttUndefined || tiffType() == ttUnsignedByte || tiffType() == ttSignedByte);
         return mn_->size();
     }
 
@@ -1046,7 +1051,17 @@ namespace Exiv2 {
 
         TypeId typeId = toTypeId(tiffType(), tag(), group());
         long typeSize = TypeInfo::typeSize(typeId);
-        assert(typeSize != 0);
+        if (0 == typeSize) {
+#ifndef SUPPRESS_WARNINGS
+            EXV_WARNING << "Directory " << groupName(group())
+                        << ", entry 0x" << std::setw(4)
+                        << std::setfill('0') << std::hex << tag()
+                        << " has unknown Exif (TIFF) type " << std::dec << tiffType()
+                        << "; setting type size 1.\n";
+#endif
+            typeSize = 1;
+        }
+
         return static_cast<uint32_t>(static_cast<double>(size()) / typeSize + 0.5);
     }
 
@@ -1085,6 +1100,15 @@ namespace Exiv2 {
         // Nothing to do if there are no entries and the size of the next IFD is 0
         if (compCount == 0 && sizeNext == 0) return 0;
 
+        // Remember the offset of the CR2 RAW IFD
+        if (group() == ifd3Id) {
+#ifdef DEBUG
+            std::cerr << "Directory " << groupName(group()) << " offset is 0x"
+                      << std::setw(8) << std::setfill('0') << std::hex << offset << std::dec
+                      << "\n";
+#endif
+            ioWrapper.setTarget(OffsetWriter::cr2RawIfdOffset, offset);
+        }
         // Size of all directory entries, without values and additional data
         const uint32_t sizeDir = 2 + 12 * compCount + (hasNext_ ? 4 : 0);
 
@@ -1382,7 +1406,7 @@ namespace Exiv2 {
         std::sort(elements_.begin(), elements_.end(), cmpTagLt);
         uint32_t idx = 0;
         MemIo mio;
-        IoWrapper mioWrapper(mio, 0, 0);
+        IoWrapper mioWrapper(mio, 0, 0, 0);
         // Some array entries need to have the size in the first element
         if (cfg()->hasSize_) {
             byte buf[4];

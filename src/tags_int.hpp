@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    tags_int.hpp
   @brief   Internal Exif tag and type information
-  @version $Rev: 2453 $
+  @version $Rev: 2696 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    15-Jan-04, ahu: created<BR>
@@ -98,6 +98,7 @@ namespace Exiv2 {
         nikonIiId,
         nikonAfId,
         nikonAf2Id,
+        nikonAFTId,
         nikonFiId,
         nikonMeId,
         nikonFl1Id,
@@ -138,8 +139,10 @@ namespace Exiv2 {
         olympusRiId,
         panasonicId,
         pentaxId,
+        pentaxDngId,
         samsung2Id,
         samsungPvId,
+        samsungPwId,
         sigmaId,
         sony1Id,
         sony2Id,

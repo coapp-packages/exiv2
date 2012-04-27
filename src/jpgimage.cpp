@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,7 +20,7 @@
  */
 /*
   File:      jpgimage.cpp
-  Version:   $Rev: 2558 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
              Brad Schick (brad) <brad@robotbattle.com>
              Volker Grabsch (vog) <vog@notjusthosting.com>
@@ -29,7 +29,7 @@
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: jpgimage.cpp 2558 2011-07-18 15:24:38Z vog $")
+EXIV2_RCSID("@(#) $Id: jpgimage.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -86,9 +86,21 @@ namespace Exiv2 {
     const char     JpegBase::xmpId_[]  = "http://ns.adobe.com/xap/1.0/\0";
 
     const char     Photoshop::ps3Id_[] = "Photoshop 3.0\0";
-    const char     Photoshop::bimId_[] = "8BIM";
+    const char*    Photoshop::irbId_[] = {"8BIM", "AgHg", "DCSR", "PHUT"};
+    const char     Photoshop::bimId_[] = "8BIM"; // deprecated
     const uint16_t Photoshop::iptc_    = 0x0404;
     const uint16_t Photoshop::preview_ = 0x040c;
+
+    bool Photoshop::isIrb(const byte* pPsData,
+                          long        sizePsData)
+    {
+        if (sizePsData < 4) return false;
+        for (size_t i = 0; i < (sizeof irbId_) / (sizeof *irbId_); i++) {
+            assert(strlen(irbId_[i]) == 4);
+            if (memcmp(pPsData, irbId_[i], 4) == 0) return true;
+        }
+        return false;
+    }
 
     bool Photoshop::valid(const byte* pPsData,
                           long        sizePsData)
@@ -126,8 +138,7 @@ namespace Exiv2 {
         std::cerr << "Photoshop::locateIrb: ";
 #endif
         // Data should follow Photoshop format, if not exit
-        while (   position <= sizePsData - 12
-               && memcmp(pPsData + position, Photoshop::bimId_, 4) == 0) {
+        while (position <= sizePsData - 12 && isIrb(pPsData + position, 4)) {
             const byte *hrd = pPsData + position;
             position += 4;
             uint16_t type = getUShort(pPsData + position, bigEndian);
@@ -237,7 +248,7 @@ namespace Exiv2 {
         DataBuf rawIptc = IptcParser::encode(iptcData);
         if (rawIptc.size_ > 0) {
             byte tmpBuf[12];
-            std::memcpy(tmpBuf, Photoshop::bimId_, 4);
+            std::memcpy(tmpBuf, Photoshop::irbId_[0], 4);
             us2Data(tmpBuf + 4, iptc_, bigEndian);
             tmpBuf[6] = 0;
             tmpBuf[7] = 0;
@@ -276,7 +287,7 @@ namespace Exiv2 {
 
     JpegBase::JpegBase(int type, BasicIo::AutoPtr io, bool create,
                        const byte initData[], long dataSize)
-        : Image(type, mdExif | mdIptc | mdComment, io)
+        : Image(type, mdExif | mdIptc | mdXmp | mdComment, io)
     {
         if (create) {
             initImage(initData, dataSize);
@@ -793,7 +804,7 @@ namespace Exiv2 {
             }
             else if (   skipApp1Exif == count
                      || skipApp1Xmp  == count
-                     || find(skipApp13Ps3.begin(), skipApp13Ps3.end(), count) != skipApp13Ps3.end()
+                     || std::find(skipApp13Ps3.begin(), skipApp13Ps3.end(), count) != skipApp13Ps3.end()
                      || skipCom      == count) {
                 --search;
                 io_->seek(size-bufRead, BasicIo::cur);

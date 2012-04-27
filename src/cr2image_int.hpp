@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    cr2image_int.hpp
   @brief   Internal classes to support CR2 image format
-  @version $Rev: 2453 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    23-Apr-08, ahu: created
@@ -53,7 +53,7 @@ namespace Exiv2 {
         //! @name Creators
         //@{
         //! Default constructor
-        Cr2Header();
+        Cr2Header(ByteOrder byteOrder =littleEndian);
         //! Destructor.
         ~Cr2Header();
         //@}
@@ -66,7 +66,13 @@ namespace Exiv2 {
         //! @name Accessors
         //@{
         DataBuf write() const;
+        bool isImageTag(      uint16_t       tag,
+                              IfdId          group,
+                        const PrimaryGroups* pPrimaryGroups) const;
         //@}
+
+        //! Return the address of offset2 from the start of the header
+        static uint32_t offset2addr() { return 12; }
 
     private:
         // DATA

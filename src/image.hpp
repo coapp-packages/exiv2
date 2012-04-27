@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    image.hpp
   @brief   Class Image, defining the interface for all Image subclasses.
-  @version $Rev: 2553 $
+  @version $Rev: 2701 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @author  Brad Schick (brad)
@@ -60,12 +60,12 @@ namespace Exiv2 {
 
     //! Native preview information. This is meant to be used only by the PreviewManager.
     struct NativePreview {
-        long position_;
-        uint32_t size_;
-        uint32_t width_;
-        uint32_t height_;
-        std::string filter_;
-        std::string mimeType_;
+        long position_;                         //!< Position
+        uint32_t size_;                         //!< Size
+        uint32_t width_;                        //!< Width
+        uint32_t height_;                       //!< Height
+        std::string filter_;                    //!< Filter
+        std::string mimeType_;                  //!< MIME type
     };
 
     //! List of native previews. This is meant to be used only by the PreviewManager.

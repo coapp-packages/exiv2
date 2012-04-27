@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      samsungmn.cpp
-  Version:   $Rev: 2613 $
+  Version:   $Rev: 2701 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   27-Sep-10, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: samsungmn.cpp 2613 2011-09-12 15:54:13Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: samsungmn.cpp 2701 2012-04-13 14:08:56Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -55,7 +55,9 @@ namespace Exiv2 {
         { 2, N_("Samsung Zoom 18-55mm F3.5-5.6 OIS")     },
         { 3, N_("Samsung Zoom 50-200mm F4-5.6 ED OIS")   },
         { 4, N_("Samsung 20-50mm F3.5-5.6 Compact Zoom") },
-        { 5, N_("Samsung 20mm F2.8 Pancake")             }
+        { 5, N_("Samsung 20mm F2.8 Pancake")             },
+        { 7, N_("Samsung 60mm F2.8 Macro ED OIS SSA")    },
+        { 8, N_("Samsung 16mm F2.4 Ultra Wide Pancake")  }
     };
 
     //! ColorSpace, tag 0xa011
@@ -70,18 +72,7 @@ namespace Exiv2 {
         { 1, N_("On")  }
     };
 
-    std::ostream& printPictureWizard(std::ostream& os, const Value& value, const ExifData*)
-    {
-        if (value.count() != 5 || value.typeId() != unsignedShort) {
-            return os << value;
-        }
-        return os <<  "Mode: " << value.toLong(0)
-                  << ", Col: " << value.toLong(1)
-                  << ", Sat: " << value.toLong(2) - 4
-                  << ", Sha: " << value.toLong(3) - 4
-                  << ", Con: " << value.toLong(4) - 4;
-    }
-
+    //! Print the camera temperature
     std::ostream& printCameraTemperature(std::ostream& os, const Value& value, const ExifData*)
     {
         if (value.count() != 1 || value.typeId() != signedRational) {
@@ -90,6 +81,7 @@ namespace Exiv2 {
         return os << value.toFloat() << " C";
     }
 
+    //! Print the 35mm focal length
     std::ostream& printFocalLength35(std::ostream& os, const Value& value, const ExifData*)
     {
         if (value.count() != 1 || value.typeId() != unsignedLong) {
@@ -111,7 +103,7 @@ namespace Exiv2 {
     // Samsung MakerNote Tag Info
     const TagInfo Samsung2MakerNote::tagInfo_[] = {
         TagInfo(0x0001, "Version", N_("Version"), N_("Makernote version"), samsung2Id, makerTags, undefined, -1, printExifVersion),
-        TagInfo(0x0021, "PictureWizard", N_("Picture Wizard"), N_("Picture wizard"), samsung2Id, makerTags, unsignedShort, -1, printPictureWizard),
+        TagInfo(0x0021, "PictureWizard", N_("Picture Wizard"), N_("Picture wizard composite tag"), samsung2Id, makerTags, unsignedShort, -1, printValue),
         TagInfo(0x0030, "LocalLocationName", N_("Local Location Name"), N_("Local location name"), samsung2Id, makerTags, asciiString, -1, printValue),
         TagInfo(0x0031, "LocationName", N_("Location Name"), N_("Location name"), samsung2Id, makerTags, asciiString, -1, printValue),
         TagInfo(0x0035, "Preview", N_("Pointer to a preview image"), N_("Offset to an IFD containing a preview image"), samsung2Id, makerTags, unsignedLong, -1, printValue),
@@ -147,6 +139,47 @@ namespace Exiv2 {
     const TagInfo* Samsung2MakerNote::tagList()
     {
         return tagInfo_;
+    }
+
+    //! PictureWizard Mode
+    extern const TagDetails samsungPwMode[] = {
+        {  0, N_("Standard")  },
+        {  1, N_("Vivid")     },
+        {  2, N_("Portrait")  },
+        {  3, N_("Landscape") },
+        {  4, N_("Forest")    },
+        {  5, N_("Retro")     },
+        {  6, N_("Cool")      },
+        {  7, N_("Calm")      },
+        {  8, N_("Classic")   },
+        {  9, N_("Custom1")   },
+        { 10, N_("Custom2")   },
+        { 11, N_("Custom3")   }
+    };
+
+    //! Print the tag value minus 4
+    std::ostream& printValueMinus4(std::ostream& os, const Value& value, const ExifData*)
+    {
+        if (value.count() != 1 || value.typeId() != unsignedShort) {
+            return os << value;
+        }
+        return os << value.toLong(0) - 4;
+    }
+
+    // Samsung PictureWizard Tag Info
+    const TagInfo Samsung2MakerNote::tagInfoPw_[] = {
+        TagInfo(0x0000, "Mode", N_("Mode"), N_("Mode"), samsungPwId, makerTags, unsignedShort, 1, EXV_PRINT_TAG(samsungPwMode)),
+        TagInfo(0x0001, "Color", N_("Color"), N_("Color"), samsungPwId, makerTags, unsignedShort, 1, printValue),
+        TagInfo(0x0002, "Saturation", N_("Saturation"), N_("Saturation"), samsungPwId, makerTags, unsignedShort, 1, printValueMinus4),
+        TagInfo(0x0003, "Sharpness", N_("Sharpness"), N_("Sharpness"), samsungPwId, makerTags, unsignedShort, 1, printValueMinus4),
+        TagInfo(0x0004, "Contrast", N_("Contrast"), N_("Contrast"), samsungPwId, makerTags, unsignedShort, 1, printValueMinus4),
+        // End of list marker
+        TagInfo(0xffff, "(UnknownSamsungPictureWizardTag)", "(UnknownSamsungPictureWizardTag)", N_("Unknown SamsungPictureWizard tag"), samsungPwId, makerTags, unsignedShort, 1, printValue)
+    };
+
+    const TagInfo* Samsung2MakerNote::tagListPw()
+    {
+        return tagInfoPw_;
     }
 
 }}                                      // namespace Internal, Exiv2

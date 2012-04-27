@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -30,7 +30,7 @@
   [6] Email communication with Roger Larsson<BR>
   [7] <a href="http://www.cybercom.net/~dcoffin/dcraw/">Decoding raw digital photos in Linux</a> by Dave Coffin<br>
 
-  @version $Rev: 2453 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @author  Gilles Caulier (gc)
@@ -125,6 +125,8 @@ namespace Exiv2 {
         static const TagInfo* tagListAf();
         //! Return read-only list of built-in Auto Focus 2 tags
         static const TagInfo* tagListAf2();
+        //! Return read-only list of built-in AF Fine Tune tags
+        static const TagInfo* tagListAFT();
         //! Return read-only list of built-in File Info tags
         static const TagInfo* tagListFi();
         //! Return read-only list of built-in Multi Exposure tags
@@ -234,6 +236,8 @@ namespace Exiv2 {
         static const TagInfo tagInfoAf_[];
         //! Auto Focus tag 2 information
         static const TagInfo tagInfoAf2_[];
+        //! AF Fine Tune tag information
+        static const TagInfo tagInfoAFT_[];
         //! File Info tag information
         static const TagInfo tagInfoFi_[];
         //! Multi Exposure tag information

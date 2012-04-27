@@ -1,5 +1,5 @@
 // ***************************************************************** -*- C++ -*-
-// xmpsample.cpp, $Rev: 2286 $
+// xmpsample.cpp, $Rev: 2639 $
 // Sample/test for high level XMP classes. See also addmoddel.cpp
 
 #include <exiv2/exiv2.hpp>
@@ -175,6 +175,11 @@ try {
     xmpData.add(Exiv2::XmpKey("Xmp.xmpBJ.JobRef[2]/stJob:name"), &tv);
     tv.read("Best man");
     xmpData.add(Exiv2::XmpKey("Xmp.xmpBJ.JobRef[2]/stJob:role"), &tv);
+
+    // Add a creator contact info structure
+    xmpData["Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrCity"] = "Kuala Lumpur";
+    xmpData["Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiAdrCtry"] = "Malaysia";
+    xmpData["Xmp.iptc.CreatorContactInfo/Iptc4xmpCore:CiUrlWork"] = "http://www.exiv2.org";
 
     // -------------------------------------------------------------------------
     // Output XMP properties

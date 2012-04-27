@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -22,7 +22,7 @@
   Abstract : Tester application for image file handling
 
   File     : metacopy.cpp
-  Version  : $Rev: 2453 $
+  Version  : $Rev: 2681 $
   Author(s): Brad Schick (brad) <brad@robotbattle.com>
   History  : 13-Jul-04, brad: created
  */

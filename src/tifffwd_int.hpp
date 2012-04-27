@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    tifffwd_int.hpp
   @brief   Internal TIFF parser related typedefs and forward definitions.
-  @version $Rev: 2453 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    24-Jun-06, ahu: created
@@ -73,6 +73,7 @@ namespace Exiv2 {
     struct TiffMappingInfo;
 
     class IoWrapper;
+    class OffsetWriter;
 
 // *****************************************************************************
 // type definitions

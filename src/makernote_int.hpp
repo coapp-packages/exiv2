@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -24,7 +24,7 @@
            vendor specific makernote implementations.<BR>References:<BR>
   [1] <a href="http://www.sno.phy.queensu.ca/~phil/exiftool/">ExifTool</a> by Phil Harvey<BR>
   [2] <a href="http://www.cybercom.net/~dcoffin/dcraw/">Decoding raw digital photos in Linux</a> by Dave Coffin
-  @version $Rev: 2453 $
+  @version $Rev: 2701 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    11-Apr-06, ahu: created
@@ -190,11 +190,12 @@ namespace Exiv2 {
         virtual uint32_t write(IoWrapper& ioWrapper, ByteOrder byteOrder) const;
         virtual uint32_t ifdOffset() const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf header_;                //!< Data buffer for the makernote header
         static const byte signature_[]; //!< Olympus makernote header signature
-        static const uint32_t size_;    //!< Size of the signature
 
     }; // class OlympusMnHeader
 
@@ -221,11 +222,12 @@ namespace Exiv2 {
         virtual uint32_t ifdOffset() const;
         virtual uint32_t baseOffset(uint32_t mnOffset) const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf header_;                //!< Data buffer for the makernote header
         static const byte signature_[]; //!< Olympus makernote header signature
-        static const uint32_t size_;    //!< Size of the signature
 
     }; // class Olympus2MnHeader
 
@@ -254,11 +256,12 @@ namespace Exiv2 {
         virtual ByteOrder byteOrder() const;
         virtual uint32_t  baseOffset(uint32_t mnOffset) const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf header_;                //!< Data buffer for the makernote header
         static const byte signature_[]; //!< Fujifilm makernote header signature
-        static const uint32_t size_;    //!< Size of the signature
         static const ByteOrder byteOrder_; //!< Byteorder for makernote (always II)
         uint32_t start_;                //!< Start of the mn IFD rel. to mn start
 
@@ -286,12 +289,13 @@ namespace Exiv2 {
         virtual uint32_t write(IoWrapper& ioWrapper, ByteOrder byteOrder) const;
         virtual uint32_t ifdOffset() const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf buf_;                   //!< Raw header data
         uint32_t start_;                //!< Start of the mn IFD rel. to mn start
         static const byte signature_[]; //!< Nikon 2 makernote header signature
-        static const uint32_t size_;    //!< Size of the signature
 
     }; // class Nikon2MnHeader
 
@@ -320,13 +324,14 @@ namespace Exiv2 {
         virtual ByteOrder byteOrder() const;
         virtual uint32_t  baseOffset(uint32_t mnOffset) const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf buf_;                   //!< Raw header data
         ByteOrder byteOrder_;           //!< Byteorder for makernote
         uint32_t start_;                //!< Start of the mn IFD rel. to mn start
         static const byte signature_[]; //!< Nikon 3 makernote header signature
-        static const uint32_t size_;    //!< Size of the signature
 
     }; // class Nikon3MnHeader
 
@@ -352,14 +357,47 @@ namespace Exiv2 {
         virtual uint32_t write(IoWrapper& ioWrapper, ByteOrder byteOrder) const;
         virtual uint32_t ifdOffset() const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf buf_;                   //!< Raw header data
         uint32_t start_;                //!< Start of the mn IFD rel. to mn start
         static const byte signature_[]; //!< Panasonic makernote header signature
-        static const uint32_t size_;    //!< Size of the signature
 
     }; // class PanasonicMnHeader
+
+    //! Header of an Pentax DNG Makernote
+    class PentaxDngMnHeader : public MnHeader {
+    public:
+        //! @name Creators
+        //@{
+        //! Default constructor
+        PentaxDngMnHeader();
+        //! Virtual destructor.
+        virtual ~PentaxDngMnHeader();
+        //@}
+        //! @name Manipulators
+        //@{
+        virtual bool read(const byte* pData,
+                          uint32_t    size,
+                          ByteOrder   byteOrder);
+        //@}
+        //! @name Accessors
+        //@{
+        virtual uint32_t size() const;
+        virtual uint32_t write(IoWrapper& ioWrapper, ByteOrder byteOrder) const;
+        virtual uint32_t ifdOffset() const;
+        virtual uint32_t baseOffset(uint32_t mnOffset) const;
+        //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
+
+    private:
+        DataBuf header_;                //!< Data buffer for the makernote header
+        static const byte signature_[]; //!< Pentax DNG makernote header signature
+
+    }; // class PentaxDngMnHeader
 
     //! Header of an Pentax Makernote
     class PentaxMnHeader : public MnHeader {
@@ -383,11 +421,12 @@ namespace Exiv2 {
         virtual uint32_t write(IoWrapper& ioWrapper, ByteOrder byteOrder) const;
         virtual uint32_t ifdOffset() const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf header_;                //!< Data buffer for the makernote header
         static const byte signature_[]; //!< Pentax makernote header signature
-        static const uint32_t size_;    //!< Size of the signature
 
     }; // class PentaxMnHeader
 
@@ -436,13 +475,14 @@ namespace Exiv2 {
         virtual uint32_t write(IoWrapper& ioWrapper, ByteOrder byteOrder) const;
         virtual uint32_t ifdOffset() const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf buf_;                    //!< Raw header data
         uint32_t start_;                 //!< Start of the mn IFD rel. to mn start
         static const byte signature1_[]; //!< Sigma makernote header signature 1
         static const byte signature2_[]; //!< Sigma makernote header signature 2
-        static const uint32_t size_;     //!< Size of the signature
 
     }; // class SigmaMnHeader
 
@@ -468,12 +508,13 @@ namespace Exiv2 {
         virtual uint32_t write(IoWrapper& ioWrapper, ByteOrder byteOrder) const;
         virtual uint32_t ifdOffset() const;
         //@}
+        //! Return the size of the makernote header signature
+        static uint32_t sizeOfSignature();
 
     private:
         DataBuf buf_;                   //!< Raw header data
         uint32_t start_;                //!< Start of the mn IFD rel. to mn start
         static const byte signature_[]; //!< Sony makernote header signature
-        static const uint32_t size_;    //!< Size of the signature
 
     }; // class SonyMnHeader
 
@@ -568,6 +609,11 @@ namespace Exiv2 {
 
     //! Function to create an Pentax makernote
     TiffComponent* newPentaxMn2(uint16_t tag,
+                                IfdId    group,
+                                IfdId    mnGroup);
+
+    //! Function to create an Pentax DNG makernote
+    TiffComponent* newPentaxDngMn2(uint16_t tag,
                                 IfdId    group,
                                 IfdId    mnGroup);
 

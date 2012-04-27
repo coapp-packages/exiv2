@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -24,7 +24,7 @@
            References: Similar versioning defines are used in KDE, GTK and other
            libraries. See http://apr.apache.org/versioning.html for accompanying
            guidelines.
-  @version $Rev: 2588 $
+  @version $Rev: 2685 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    31-May-06, ahu: created
@@ -44,7 +44,7 @@
 /*!
   @brief %Exiv2 MINOR version number of the library used at compile-time.
  */
-#define EXIV2_MINOR_VERSION (22)
+#define EXIV2_MINOR_VERSION (23)
 /*!
   @brief %Exiv2 PATCH version number of the library used at compile-time.
  */

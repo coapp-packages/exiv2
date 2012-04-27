@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * Lens database for the conversion of Nikon lens data to readable lens names
  * Copyright (C) 2005-2008 Robert Rottmerhusen <lens_id@rottmerhusen.com>
@@ -23,7 +23,7 @@
  */
 /*
   File:      nikonmn.cpp
-  Version:   $Rev: 2617 $
+  Version:   $Rev: 2715 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
              Gilles Caulier (gc) <caulier dot gilles at gmail dot com>
              Jens Mueller (jm) <tschensinger at web dot de>
@@ -32,7 +32,7 @@
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: nikonmn.cpp 2617 2011-09-18 10:03:49Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: nikonmn.cpp 2715 2012-04-22 05:29:10Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -50,7 +50,7 @@ EXIV2_RCSID("@(#) $Id: nikonmn.cpp 2617 2011-09-18 10:03:49Z ahuggel $")
 #include <iomanip>
 #include <cassert>
 #include <cstring>
-#include <cmath>
+#include <math.h> //for log, pow, abs
 
 // *****************************************************************************
 // class member definitions
@@ -603,6 +603,7 @@ namespace Exiv2 {
         TagInfo(0x00b3, "ToningEffect", "Toning Effect", N_("Toning effect"), nikon3Id, makerTags, asciiString, -1, printValue),
         TagInfo(0x00b7, "AFInfo2", "AF Info 2", N_("AF info 2"), nikon3Id, makerTags, undefined, -1, printValue),
         TagInfo(0x00b8, "FileInfo", "File Info", N_("File info"), nikon3Id, makerTags, undefined, -1, printValue),
+        TagInfo(0x00b9, "AFTune", "AF Tune", N_("AF tune"), nikon3Id, makerTags, undefined, -1, printValue),
         TagInfo(0x0e00, "PrintIM", N_("Print IM"), N_("PrintIM information"), nikon3Id, makerTags, undefined, -1, printValue),
         // TODO: Add Capture Data decoding implementation.
         TagInfo(0x0e01, "CaptureData", N_("Capture Data"), N_("Capture data"), nikon3Id, makerTags, undefined, -1, printValue),
@@ -707,6 +708,27 @@ namespace Exiv2 {
     const TagInfo* Nikon3MakerNote::tagListPc()
     {
         return tagInfoPc_;
+    }
+    
+    //! OnOff
+    extern const TagDetails aftOnOff[] = {
+        {  0, N_("Off")  },
+        {  1, N_("On") },
+        {  2, N_("On") }
+    };
+    
+    // Nikon3 AF Fine Tune
+    const TagInfo Nikon3MakerNote::tagInfoAFT_[] = {
+        TagInfo(0, "AFFineTune", N_("AF Fine Tune"), N_("AF fine tune"), nikonAFTId, makerTags, unsignedByte, 1, EXV_PRINT_TAG(aftOnOff)),
+        TagInfo(1, "AFFineTuneIndex", N_("AF Fine Tune Index"), N_("AF fine tune index"), nikonAFTId, makerTags, unsignedByte, 1, printValue),
+        TagInfo(2, "AFFineTuneAdj", N_("AF Fine Tune Adjustment"), N_("AF fine tune adjustment"), nikonAFTId, makerTags, signedByte, 1, printValue),
+        // End of list marker
+        TagInfo(0xffff, "(UnknownNikonAFTTag)", "(UnknownNikonAFTTag)", N_("Unknown Nikon AF Fine Tune Tag"), nikonAFTId, makerTags, unsignedByte, 1, printValue)
+    };
+    
+    const TagInfo* Nikon3MakerNote::tagListAFT()
+    {
+        return tagInfoAFT_;
     }
 
     // Nikon3 World Time Tag Info
@@ -1520,7 +1542,7 @@ namespace Exiv2 {
             unsigned focusmetering = value.toLong(0);
             unsigned focuspoint = value.toLong(1);
             unsigned focusused = (value.toLong(2) << 8) + value.toLong(3);
-            enum {standard, wide} combination = standard;
+            // TODO: enum {standard, wide} combination = standard;
             const unsigned focuspoints =   sizeof(nikonFocuspoints)
                                          / sizeof(nikonFocuspoints[0]);
 
@@ -1539,8 +1561,8 @@ namespace Exiv2 {
             case 0x01: os << _("Dynamic area");         break; // D70, D200
             case 0x02: os << _("Closest subject");      break; // D70, D200
             case 0x03: os << _("Group dynamic-AF");     break; // D200
-            case 0x04: os << _("Single area (wide)");   combination = wide; break; // D200
-            case 0x05: os << _("Dynamic area (wide)");  combination = wide; break; // D200
+            case 0x04: os << _("Single area (wide)");   /* TODO: combination = wide; */ break; // D200
+            case 0x05: os << _("Dynamic area (wide)");  /* TODO: combination = wide; */ break; // D200
             default: os << "(" << focusmetering << ")"; break;
             }
 
@@ -1682,14 +1704,14 @@ namespace Exiv2 {
 #ifndef FMOUNTLH
 #define FMOUNTLH
 //------------------------------------------------------------------------------
-// List of AF F-Mount lenses - Version 4.3.423.01                    2011-07-19
+// List of AF F-Mount lenses - Version 4.3.428.01                    2012-03-26
 //------------------------------------------------------------------------------
-#define FMLVERSION "4.3.423.01"
-#define FMLDATE "2011-07-19"
+#define FMLVERSION "4.3.428.01"
+#define FMLDATE "2012-03-26"
 //------------------------------------------------------------------------------
 //
 //
-// Created by Robert Rottmerhusen 2005 - 2011
+// Created by Robert Rottmerhusen 2005 - 2012
 // http://www.rottmerhusen.com (lens_id@rottmerhusen.com)
 //
 // For contributor info and more visit my online list:
@@ -1949,6 +1971,8 @@ fmountlens[] = {
 {0xAF,0x54,0x44,0x44,0x0C,0x0C,0xB1,0x06,0x01,0x00,0x00, "Nikon", "JAA134DA", "AF-S Nikkor 35mm f/1.4G"},
 {0xB0,0x4C,0x50,0x50,0x14,0x14,0xB2,0x06,0x01,0x00,0x00, "Nikon", "JAA015DA", "AF-S Nikkor 50mm f/1.8G"},
 {0xB1,0x48,0x48,0x48,0x24,0x24,0xB3,0x06,0x01,0x00,0x00, "Nikon", "JAA638DA", "AF-S DX Micro Nikkor 40mm f/2.8G"},
+//B2
+{0xB3,0x4C,0x62,0x62,0x14,0x14,0xB5,0x06,0x01,0x00,0x00, "Nikon", "JAA341DA", "AF-S Nikkor 85mm f/1.8G"},
 //
 {0x01,0x00,0x00,0x00,0x00,0x00,0x02,0x00,0x00,0x00,0x00, "Nikon", "JAA90701", "TC-16A"},
 {0x01,0x00,0x00,0x00,0x00,0x00,0x08,0x00,0x00,0x00,0x00, "Nikon", "JAA90701", "TC-16A"},
@@ -1973,6 +1997,7 @@ fmountlens[] = {
 {0x48,0x54,0x3E,0x3E,0x0C,0x0C,0x4B,0x06,0x01,0x00,0x05, "Sigma", "477554", "30mm F1.4 EX DC HSM"},
 {0xF8,0x54,0x3E,0x3E,0x0C,0x0C,0x4B,0x06,0x01,0x00,0x05, "Sigma", "477554", "30mm F1.4 EX DC HSM"},
 {0xDE,0x54,0x50,0x50,0x0C,0x0C,0x4B,0x06,0x01,0x00,0x05, "Sigma", "310554", "50mm F1.4 EX DG HSM"},
+{0x02,0x48,0x50,0x50,0x24,0x24,0x02,0x00,0x00,0x00,0x05, "Sigma", "", "Macro 50mm F2.8"},
 {0x32,0x54,0x50,0x50,0x24,0x24,0x35,0x02,0x00,0x00,0x05, "Sigma", "346447", "Macro 50mm F2.8 EX DG"},
 {0xE3,0x54,0x50,0x50,0x24,0x24,0x35,0x02,0x00,0x00,0x05, "Sigma", "", "Macro 50mm F2.8 EX DG"},
 {0x79,0x48,0x5C,0x5C,0x24,0x24,0x1C,0x06,0x00,0x00,0x05, "Sigma", "270599", "Macro 70mm F2.8 EX DG"},
@@ -2008,6 +2033,7 @@ fmountlens[] = {
 {0x26,0x40,0x27,0x3F,0x2C,0x34,0x1C,0x02,0x00,0x00,0x05, "Sigma", "", "15-30mm F3.5-4.5 EX DG Aspherical DF"},
 {0x48,0x48,0x2B,0x44,0x24,0x30,0x4B,0x06,0x00,0x00,0x05, "Sigma", "", "17-35mm F2.8-4 EX DG  Aspherical HSM"},
 {0x26,0x54,0x2B,0x44,0x24,0x30,0x1C,0x02,0x00,0x00,0x05, "Sigma", "", "17-35mm F2.8-4 EX Aspherical"},
+{0x9D,0x48,0x2B,0x50,0x24,0x24,0x4B,0x0E,0x00,0x00,0x05, "Sigma", "", "17-50mm F2.8 EX DC OS HSM"},
 {0x7A,0x47,0x2B,0x5C,0x24,0x34,0x4B,0x06,0x00,0x00,0x05, "Sigma", "689599", "17-70mm F2.8-4.5 DC Macro Asp. IF HSM"},
 {0x7A,0x48,0x2B,0x5C,0x24,0x34,0x4B,0x06,0x00,0x00,0x05, "Sigma", "689599", "17-70mm F2.8-4.5 DC Macro Asp. IF HSM"},
 {0x7F,0x48,0x2B,0x5C,0x24,0x34,0x1C,0x06,0x00,0x00,0x05, "Sigma", "", "17-70mm F2.8-4.5 DC Macro Asp. IF"},
@@ -2105,10 +2131,12 @@ fmountlens[] = {
 {0x07,0x46,0x2B,0x44,0x24,0x30,0x03,0x02,0x00,0x00,0x02, "Tamron", "A05", "SP AF 17-35mm F/2.8-4 Di LD Aspherical (IF)"},
 {0x00,0x53,0x2B,0x50,0x24,0x24,0x00,0x06,0x00,0x00,0x02, "Tamron", "A16", "SP AF 17-50mm F/2.8 XR Di II LD Aspherical (IF)"},
 {0x00,0x54,0x2B,0x50,0x24,0x24,0x00,0x06,0x01,0x00,0x02, "Tamron", "A16NII", "SP AF 17-50mm F/2.8 XR Di II LD Aspherical (IF)"},
+{0xFB,0x54,0x2B,0x50,0x24,0x24,0x84,0x06,0x01,0x00,0x02, "Tamron", "A16NII", "SP AF 17-50mm F/2.8 XR Di II LD Aspherical (IF)"},
 {0xF3,0x54,0x2B,0x50,0x24,0x24,0x84,0x0E,0x01,0x00,0x02, "Tamron", "B005", "SP AF 17-50mm F/2.8 XR Di II VC LD Aspherical (IF)"},
 {0x00,0x3F,0x2D,0x80,0x2B,0x40,0x00,0x06,0x00,0x00,0x02, "Tamron", "A14", "AF 18-200mm F/3.5-6.3 XR Di II LD Aspherical (IF)"},
 {0x00,0x3F,0x2D,0x80,0x2C,0x40,0x00,0x06,0x00,0x00,0x02, "Tamron", "A14", "AF 18-200mm F/3.5-6.3 XR Di II LD Aspherical (IF) Macro"},
 {0x00,0x40,0x2D,0x80,0x2C,0x40,0x00,0x06,0x01,0x00,0x02, "Tamron", "A14NII", "AF 18-200mm F/3.5-6.3 XR Di II LD Aspherical (IF) Macro"},
+{0xFC,0x40,0x2D,0x80,0x2C,0x40,0xDF,0x06,0x01,0x00,0x02, "Tamron", "A14NII", "AF 18-200mm F/3.5-6.3 XR Di II LD Aspherical (IF) Macro"},
 {0x00,0x40,0x2D,0x88,0x2C,0x40,0x62,0x06,0x00,0x00,0x02, "Tamron", "A18", "AF 18-250mm F/3.5-6.3 Di II LD Aspherical (IF) Macro"},
 {0x00,0x40,0x2D,0x88,0x2C,0x40,0x00,0x06,0x01,0x00,0x02, "Tamron", "A18NII", "AF 18-250mm F/3.5-6.3 Di II LD Aspherical (IF) Macro "},
 {0xF5,0x40,0x2C,0x8A,0x2C,0x40,0x40,0x0E,0x01,0x00,0x02, "Tamron", "B003", "AF 18-270mm F/3.5-6.3 Di II VC LD Aspherical (IF) Macro"},
@@ -2454,8 +2482,8 @@ fmountlens[] = {
         std::ostringstream oss;
         oss.copyfmt(os);
         char sign = value.toLong() < 0 ? '-' : '+';
-        long h = long(abs(value.toLong())/60.0);
-        long min = abs(value.toLong()) - h*60;
+        long h = long(abs(value.toFloat())/60.0);
+        long min = long(abs(value.toFloat()) - h*60);
         os << std::fixed << "UTC " << sign << std::setw(2) << std::setfill('0') << h << ":" 
            << std::setw(2) << std::setfill('0') << min;
         os.copyfmt(oss);

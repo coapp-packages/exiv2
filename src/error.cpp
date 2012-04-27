@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,13 +20,13 @@
  */
 /*
   File:      error.cpp
-  Version:   $Rev: 2453 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   02-Apr-05, ahu: created
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: error.cpp 2453 2011-02-13 14:08:44Z ahuggel $")
+EXIV2_RCSID("@(#) $Id: error.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // *****************************************************************************
 // included header files
@@ -114,14 +114,14 @@ namespace {
 // class member definitions
 namespace Exiv2 {
 
-    LogMsg::Level LogMsg::level_ = LogMsg::info; // Default output level
+    LogMsg::Level LogMsg::level_ = LogMsg::warn; // Default output level
     LogMsg::Handler LogMsg::handler_ = LogMsg::defaultHandler;
 
     void LogMsg::defaultHandler(int level, const char* s)
     {
         switch (static_cast<LogMsg::Level>(level)) {
         case LogMsg::debug: std::cerr << "Debug: "; break;
-        case LogMsg::info:  break;
+        case LogMsg::info:  std::cerr << "Info: "; break;
         case LogMsg::warn:  std::cerr << "Warning: "; break;
         case LogMsg::error: std::cerr << "Error: "; break;
         case LogMsg::mute:  assert(false);

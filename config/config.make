@@ -1,6 +1,6 @@
 # ***************************************************** -*- Makefile -*-
 #
-# Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+# Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
 #
 # This Makefile is part of the Exiv2 distribution.
 #
@@ -31,7 +31,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # File:      config.make
-# Version:   $Rev: 2453 $
+# Version:   $Rev: 2681 $
 # Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
 # History:   26-Feb-05, ahu: created
 #

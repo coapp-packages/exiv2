@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -21,7 +21,7 @@
 /*!
   @file    cr2image.hpp
   @brief   Class Cr2Image
-  @version $Rev: 2453 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    22-Apr-06, ahu: created
@@ -79,21 +79,7 @@ namespace Exiv2 {
         //! @name Manipulators
         //@{
         void readMetadata();
-        /*!
-          @brief Todo: Write metadata back to the image. This method is not
-              yet implemented. Calling it will throw an Error(31).
-         */
         void writeMetadata();
-        /*!
-          @brief Todo: Not supported yet, requires writeMetadata(). Calling
-              this function will throw an Error(32).
-         */
-        void setExifData(const ExifData& exifData);
-        /*!
-          @brief Todo: Not supported yet, requires writeMetadata(). Calling
-              this function will throw an Error(32).
-         */
-        void setIptcData(const IptcData& iptcData);
         /*!
           @brief Not supported. CR2 format does not contain a comment.
               Calling this function will throw an Error(32).
@@ -143,9 +129,10 @@ namespace Exiv2 {
                  See TiffParser::encode().
         */
         static WriteMethod encode(
-                  Blob&     blob,
+                  BasicIo&  io,
             const byte*     pData,
                   uint32_t  size,
+                  ByteOrder byteOrder,
             const ExifData& exifData,
             const IptcData& iptcData,
             const XmpData&  xmpData

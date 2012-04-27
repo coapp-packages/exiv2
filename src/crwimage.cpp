@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -20,14 +20,14 @@
  */
 /*
   File:      crwimage.cpp
-  Version:   $Rev: 2522 $
+  Version:   $Rev: 2681 $
   Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
   History:   28-Aug-05, ahu: created
 
  */
 // *****************************************************************************
 #include "rcsid_int.hpp"
-EXIV2_RCSID("@(#) $Id: crwimage.cpp 2522 2011-06-28 00:38:12Z vog $")
+EXIV2_RCSID("@(#) $Id: crwimage.cpp 2681 2012-03-22 15:19:35Z ahuggel $")
 
 // Define DEBUG to output debug information to std::cerr, e.g, by calling make
 // like this: make DEFS=-DDEBUG crwimage.o
@@ -1035,7 +1035,8 @@ namespace Exiv2 {
         if (ifdId == canonSiId) {
             // Exif.Photo.FNumber
             float f = fnumber(canonEv(aperture));
-            URational ur = floatToRationalCast(f);
+            Rational r = floatToRationalCast(f);
+            URational ur(r.first, r.second);
             URationalValue fn;
             fn.value_.push_back(ur);
             image.exifData().add(ExifKey("Exif.Photo.FNumber"), &fn);

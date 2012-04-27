@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -26,7 +26,7 @@
            <a href="http://www.ozhiker.com/electronics/pjmt/jpeg_info/minolta_mn.html">Minolta Makernote list from PHP JPEG Metadata Toolkit</a><br>
            Email communication with <a href="mailto:caulier dot gilles at gmail dot com">caulier dot gilles at gmail dot com</a><br>
            Some Minolta camera settings have been decoded by <a href="mailto:xraynaud@gmail.com">Xavier Raynaud</a> from digiKam project and added by Gilles Caulier.
-  @version $Rev: 2453 $
+  @version $Rev: 2701 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @author  Gilles Caulier (cgilles)
@@ -151,6 +151,9 @@ namespace Exiv2 {
 
     //! Print Minolta/Sony ZoneMatching values to readable labels.
     std::ostream& printMinoltaSonyZoneMatching(std::ostream&, const Value&, const ExifData*);
+
+    //! Print Minolta/Sony FlashExposureComp values to readable labels.
+    std::ostream& printMinoltaSonyFlashExposureComp(std::ostream&, const Value&, const ExifData*);
 
     // TODO: Added shared methods here.
 

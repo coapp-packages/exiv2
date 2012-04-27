@@ -1,6 +1,6 @@
 # ************************************************************* -*- Makefile -*-
 #
-# Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+# Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
 #
 # This Makefile is part of the Exiv2 distribution.
 #
@@ -31,7 +31,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 # File:      Makefile
-# Version:   $Rev: 2453 $
+# Version:   $Rev: 2714 $
 # Author(s): Andreas Huggel (ahu) <ahuggel@gmx.net>
 # History:   28-May-05, ahu: created
 #
@@ -68,6 +68,7 @@ TABLES = Exif \
          NikonIi \
          NikonAf \
          NikonAf2 \
+         NikonAFT \
          NikonFi \
          NikonMe \
          NikonFl1 \
@@ -100,6 +101,7 @@ TABLES = Exif \
          PanasonicRaw \
          Pentax \
          Samsung2 \
+         SamsungPictureWizard \
          Sigma \
          Sony1 \
          SonyMinolta \
@@ -129,7 +131,11 @@ SCHEMA = xmp_dc \
          xmp_iptcExt \
          xmp_plus \
          xmp_mediapro \
-         xmp_expressionmedia
+         xmp_expressionmedia \
+         xmp_MP \
+         xmp_MPRI \
+         xmp_MPReg \
+         xmp_mwg-rs
 
 TAGLIST = ../../src/taglist
 

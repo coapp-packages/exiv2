@@ -1,6 +1,6 @@
 // ***************************************************************** -*- C++ -*-
 /*
- * Copyright (C) 2004-2011 Andreas Huggel <ahuggel@gmx.net>
+ * Copyright (C) 2004-2012 Andreas Huggel <ahuggel@gmx.net>
  *
  * This program is part of the Exiv2 distribution.
  *
@@ -22,7 +22,7 @@
   @file    samsungmn_int.hpp
   @brief   Samsung makernote tags.<BR>References:<BR>
   [1] <a href="http://www.sno.phy.queensu.ca/~phil/exiftool/">ExifTool</a> by Phil Harvey
-  @version $Rev: 2453 $
+  @version $Rev: 2681 $
   @author  Andreas Huggel (ahu)
            <a href="mailto:ahuggel@gmx.net">ahuggel@gmx.net</a>
   @date    27-Sep-10, ahu: created
@@ -53,10 +53,14 @@ namespace Exiv2 {
     public:
         //! Return read-only list of built-in Samsung tags
         static const TagInfo* tagList();
+        //! Return read-only list of built-in PictureWizard tags
+        static const TagInfo* tagListPw();
 
     private:
         //! Tag information
         static const TagInfo tagInfo_[];
+        //! PictureWizard tag information
+        static const TagInfo tagInfoPw_[];
 
     }; // class Samsung2MakerNote
 
