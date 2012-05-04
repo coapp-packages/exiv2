@@ -1,6 +1,7 @@
 @import "version.inc" ;
 @import "outercurve.inc" ;
 
+#define { author-version: 0.23; }
 #define { 
     flavor: "${COMP??vc10}"; 
     arch : "${PLAT??x86}";
@@ -17,7 +18,7 @@ metadata {
     summary: "The exiv2 developer library";
     description: @"Exiv2 is a C++ library and a command line utility to manage image metadata. It provides fast and easy read and write access to the Exif, IPTC and XMP metadata of images in various formats."; 
     icon: @"exiv2.png";
-    author-version : "0.22";
+    author-version : "${author-version}";
     bug-tracker: "https://github.com/coapp-packages/exiv2/issues";
     stability : "0";
     licenses : {

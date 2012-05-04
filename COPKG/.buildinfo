@@ -1,7 +1,6 @@
 /* target information */
 @import "version.inc";
 
-
 #product-info  {
 	product-name: "exiv2";
 	version: "${author-version}";
@@ -40,7 +39,8 @@ test {
 };
 
 package {
-    
+    set: COMP="${COMP??vc10}";
+    set: PLAT="${PLAT??x86, x64}";
     default : false;
     uses : sign;
     
